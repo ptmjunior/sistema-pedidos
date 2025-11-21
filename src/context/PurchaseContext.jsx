@@ -1,0 +1,548 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase, handleSupabaseError } from '../lib/supabase';
+import { createSubmissionNotifications, createApprovalNotifications, createRejectionNotifications } from '../utils/notificationService';
+
+const PurchaseContext = createContext();
+
+export const usePurchase = () => {
+    const context = useContext(PurchaseContext);
+    if (!context) {
+        throw new Error('usePurchase must be used within a PurchaseProvider');
+    }
+    return context;
+};
+
+export const PurchaseProvider = ({ children }) => {
+    // Authentication State
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Data State
+    const [users, setUsers] = useState([]);
+    const [requests, setRequests] = useState([]);
+    const [vendors, setVendors] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+    const [stats, setStats] = useState({
+        pending: 0,
+        approved: 0,
+        totalSpend: 0
+    });
+
+    // =====================================================
+    // AUTHENTICATION
+    // =====================================================
+
+    useEffect(() => {
+        // Check active session on mount
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+                loadUserProfile(session.user.id);
+            } else {
+                setIsLoading(false);
+            }
+        });
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                loadUserProfile(session.user.id);
+            } else {
+                setCurrentUser(null);
+                setIsAuthenticated(false);
+                setIsLoading(false);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const loadUserProfile = async (userId) => {
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) throw error;
+
+            if (data) {
+                setCurrentUser(data);
+                setIsAuthenticated(true);
+                // Load all data after authentication
+                await Promise.all([
+                    loadUsers(),
+                    loadRequests(),
+                    loadVendors(),
+                    loadNotifications(userId)
+                ]);
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await supabase.auth.signOut();
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+            setUsers([]);
+            setRequests([]);
+            setVendors([]);
+            setNotifications([]);
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
+
+    // =====================================================
+    // DATA LOADING
+    // =====================================================
+
+    const loadUsers = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .order('name');
+
+            if (error) throw error;
+            setUsers(data || []);
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    };
+
+    const loadRequests = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('purchase_requests')
+                .select(`
+                    *,
+                    user:users(name, email, department),
+                    items:request_items(*)
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Transform data to match existing structure
+            const transformedRequests = data?.map(req => ({
+                id: req.id,
+                desc: req.description,
+                amount: parseFloat(req.amount),
+                status: req.status,
+                createdAt: req.created_at, // Add raw timestamp for PO ID generation
+                date: new Date(req.created_at).toLocaleDateString('pt-BR', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                }),
+                userId: req.user_id,
+                user: req.user?.name || 'Unknown',
+                department: req.department,
+                items: req.items?.map(item => ({
+                    id: item.id,
+                    desc: item.description,
+                    qty: item.quantity,
+                    price: parseFloat(item.unit_price),
+                    total: parseFloat(item.total),
+                    vendor: item.vendor_id,
+                    link: item.product_link || ''
+                })) || []
+            })) || [];
+
+            setRequests(transformedRequests);
+        } catch (error) {
+            console.error('Error loading requests:', error);
+        }
+    };
+
+    const loadVendors = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('vendors')
+                .select('*')
+                .order('name');
+
+            if (error) throw error;
+            setVendors(data || []);
+        } catch (error) {
+            console.error('Error loading vendors:', error);
+        }
+    };
+
+    const loadNotifications = async (userId) => {
+        try {
+            const { data, error } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('recipient_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Transform to match existing structure
+            const transformedNotifications = data?.map(notif => ({
+                id: notif.id,
+                type: notif.type,
+                recipientId: notif.recipient_id,
+                subject: notif.subject,
+                message: notif.message,
+                requestId: notif.request_id,
+                read: notif.read,
+                timestamp: new Date(notif.created_at).toISOString()
+            })) || [];
+
+            setNotifications(transformedNotifications);
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+        }
+    };
+
+    // =====================================================
+    // STATS CALCULATION
+    // =====================================================
+
+    useEffect(() => {
+        if (requests.length > 0) {
+            const pending = requests.filter(r => r.status === 'pending').length;
+            const approved = requests.filter(r => r.status === 'approved').length;
+            const totalSpend = requests
+                .filter(r => r.status === 'approved')
+                .reduce((sum, r) => sum + r.amount, 0);
+
+            setStats({ pending, approved, totalSpend });
+        }
+    }, [requests]);
+
+    // =====================================================
+    // PURCHASE REQUESTS CRUD
+    // =====================================================
+
+    const addRequest = async (newRequest) => {
+        try {
+            let totalAmount = newRequest.amount;
+            if (newRequest.items && newRequest.items.length > 0) {
+                totalAmount = newRequest.items.reduce((sum, item) => sum + item.total, 0);
+            }
+
+            // Insert purchase request
+            const { data: request, error: requestError } = await supabase
+                .from('purchase_requests')
+                .insert([{
+                    user_id: currentUser.id,
+                    description: newRequest.desc,
+                    amount: totalAmount,
+                    department: currentUser.department,
+                    status: 'pending'
+                }])
+                .select()
+                .single();
+
+            if (requestError) throw requestError;
+
+            // Insert request items
+            if (newRequest.items && newRequest.items.length > 0) {
+                const items = newRequest.items.map(item => ({
+                    request_id: request.id,
+                    description: item.desc,
+                    quantity: item.qty,
+                    unit_price: item.price,
+                    total: item.total,
+                    vendor_id: item.vendor || null,
+                    product_link: item.link || null
+                }));
+
+                const { error: itemsError } = await supabase
+                    .from('request_items')
+                    .insert(items);
+
+                if (itemsError) throw itemsError;
+            }
+
+            // Create notifications for approvers
+            const approvers = users.filter(u => u.role === 'approver');
+            if (approvers.length > 0) {
+                const submissionNotifications = approvers.map(approver => ({
+                    recipient_id: approver.id,
+                    type: 'submission',
+                    subject: `Novo pedido de ${currentUser.name}`,
+                    message: `<p><strong>${currentUser.name}</strong> submeteu um novo pedido:</p><p>${newRequest.desc}</p><p>Valor: R$ ${totalAmount.toFixed(2)}</p>`,
+                    request_id: request.id
+                }));
+
+                await supabase
+                    .from('notifications')
+                    .insert(submissionNotifications);
+            }
+
+            // Reload requests
+            await loadRequests();
+            if (currentUser) {
+                await loadNotifications(currentUser.id);
+            }
+        } catch (error) {
+            console.error('Error adding request:', error);
+            throw error;
+        }
+    };
+
+    const updateRequest = async (id, updatedData) => {
+        try {
+            let totalAmount = updatedData.amount;
+            if (updatedData.items && updatedData.items.length > 0) {
+                totalAmount = updatedData.items.reduce((sum, item) => sum + item.total, 0);
+            }
+
+            // Update purchase request
+            const { error: requestError } = await supabase
+                .from('purchase_requests')
+                .update({
+                    description: updatedData.desc,
+                    amount: totalAmount
+                })
+                .eq('id', id);
+
+            if (requestError) throw requestError;
+
+            // Delete existing items and insert new ones
+            await supabase
+                .from('request_items')
+                .delete()
+                .eq('request_id', id);
+
+            if (updatedData.items && updatedData.items.length > 0) {
+                const items = updatedData.items.map(item => ({
+                    request_id: id,
+                    description: item.desc,
+                    quantity: item.qty,
+                    unit_price: item.price,
+                    total: item.total,
+                    vendor_id: item.vendor || null,
+                    product_link: item.link || null
+                }));
+
+                const { error: itemsError } = await supabase
+                    .from('request_items')
+                    .insert(items);
+
+                if (itemsError) throw itemsError;
+            }
+
+            // Reload requests
+            await loadRequests();
+        } catch (error) {
+            console.error('Error updating request:', error);
+            throw error;
+        }
+    };
+
+    const updateStatus = async (id, status) => {
+        try {
+            const request = requests.find(r => r.id === id);
+            if (!request) return;
+
+            // Update status
+            const { error } = await supabase
+                .from('purchase_requests')
+                .update({ status })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            // Create notifications
+            if (status === 'approved') {
+                const requester = users.find(u => u.id === request.userId);
+                const buyers = users.filter(u => u.role === 'buyer');
+                const recipients = [requester, ...buyers].filter(Boolean);
+
+                if (recipients.length > 0) {
+                    const approvalNotifications = recipients.map(recipient => ({
+                        recipient_id: recipient.id,
+                        type: 'approval',
+                        subject: `Pedido aprovado`,
+                        message: `<p>O pedido <strong>${request.desc}</strong> foi aprovado por ${currentUser.name}.</p><p>Valor: R$ ${request.amount.toFixed(2)}</p>`,
+                        request_id: id
+                    }));
+
+                    await supabase
+                        .from('notifications')
+                        .insert(approvalNotifications);
+                }
+            } else if (status === 'rejected') {
+                const requester = users.find(u => u.id === request.userId);
+                if (requester) {
+                    await supabase
+                        .from('notifications')
+                        .insert([{
+                            recipient_id: requester.id,
+                            type: 'rejection',
+                            subject: `Pedido rejeitado`,
+                            message: `<p>O pedido <strong>${request.desc}</strong> foi rejeitado por ${currentUser.name}.</p>`,
+                            request_id: id
+                        }]);
+                }
+            }
+
+            // Reload data
+            await loadRequests();
+            if (currentUser) {
+                await loadNotifications(currentUser.id);
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            throw error;
+        }
+    };
+
+    // =====================================================
+    // VENDORS CRUD
+    // =====================================================
+
+    const addVendor = async (newVendor) => {
+        try {
+            const { error } = await supabase
+                .from('vendors')
+                .insert([newVendor]);
+
+            if (error) throw error;
+            await loadVendors();
+        } catch (error) {
+            console.error('Error adding vendor:', error);
+            throw error;
+        }
+    };
+
+    // =====================================================
+    // USER MANAGEMENT
+    // =====================================================
+
+    const addUser = async (newUser) => {
+        try {
+            const { error } = await supabase
+                .from('users')
+                .insert([newUser]);
+
+            if (error) throw error;
+            await loadUsers();
+        } catch (error) {
+            console.error('Error adding user:', error);
+            throw error;
+        }
+    };
+
+    const updateUser = async (id, updatedData) => {
+        try {
+            const { error } = await supabase
+                .from('users')
+                .update(updatedData)
+                .eq('id', id);
+
+            if (error) throw error;
+            await loadUsers();
+        } catch (error) {
+            console.error('Error updating user:', error);
+            throw error;
+        }
+    };
+
+    const deleteUser = async (id) => {
+        try {
+            const { error } = await supabase
+                .from('users')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            await loadUsers();
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            throw error;
+        }
+    };
+
+    // =====================================================
+    // NOTIFICATIONS
+    // =====================================================
+
+    const markNotificationAsRead = async (id) => {
+        try {
+            const { error } = await supabase
+                .from('notifications')
+                .update({ read: true })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            // Update local state
+            setNotifications(prev => prev.map(n =>
+                n.id === id ? { ...n, read: true } : n
+            ));
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    };
+
+    const getUnreadCount = (userId) => {
+        return notifications.filter(n => n.recipientId === userId && !n.read).length;
+    };
+
+    // Legacy function for compatibility (not used with Supabase)
+    const login = () => {
+        console.warn('login() is deprecated. Use Supabase Auth instead.');
+    };
+
+    const addNotifications = () => {
+        console.warn('addNotifications() is deprecated. Notifications are created in database.');
+    };
+
+    // =====================================================
+    // PROVIDER
+    // =====================================================
+
+    if (isLoading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                fontSize: '18px',
+                color: '#666'
+            }}>
+                Carregando...
+            </div>
+        );
+    }
+
+    return (
+        <PurchaseContext.Provider value={{
+            requests,
+            stats,
+            vendors,
+            users,
+            currentUser,
+            isAuthenticated,
+            notifications,
+            addRequest,
+            updateRequest,
+            updateStatus,
+            addVendor,
+            login, // Legacy
+            logout,
+            addUser,
+            updateUser,
+            deleteUser,
+            addNotifications, // Legacy
+            markNotificationAsRead,
+            getUnreadCount
+        }}>
+            {children}
+        </PurchaseContext.Provider>
+    );
+};

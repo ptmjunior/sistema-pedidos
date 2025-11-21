@@ -1,0 +1,13 @@
+# .gitignore para Supabase
+
+# Supabase
+.branches
+.temp
+.env
+.env.local
+
+# Edge Functions
+supabase/functions/.vscode/
+
+# Logs
+*.log
