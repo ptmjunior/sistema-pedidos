@@ -83,23 +83,7 @@ const Login = () => {
                     </button>
                 </form>
 
-                <div className="login-footer">
-                    <p className="text-sm text-muted">{t.login.demoCredentials}</p>
-                    <div className="demo-users">
-                        <div className="demo-user">
-                            <strong>{t.login.requester}:</strong> joao.silva@casadastintas-al.com
-                        </div>
-                        <div className="demo-user">
-                            <strong>{t.login.approver}:</strong> maria.santos@casadastintas-al.com
-                        </div>
-                        <div className="demo-user">
-                            <strong>{t.login.buyer}:</strong> pedro.oliveira@casadastintas-al.com
-                        </div>
-                        <div className="demo-password">
-                            {t.login.passwordLabel} <strong>Pietra@31</strong>
-                        </div>
-                    </div>
-                </div>
+
             </div>
 
             <style>{`

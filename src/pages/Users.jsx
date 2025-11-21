@@ -10,6 +10,7 @@ const Users = ({ onNavigate }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        password: '',
         role: 'requester',
         department: ''
     });
@@ -40,6 +41,7 @@ const Users = ({ onNavigate }) => {
         setFormData({
             name: user.name,
             email: user.email,
+            password: '', // Don't populate password on edit
             role: user.role,
             department: user.department || ''
         });
@@ -54,7 +56,7 @@ const Users = ({ onNavigate }) => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', email: '', role: 'requester', department: '' });
+        setFormData({ name: '', email: '', password: '', role: 'requester', department: '' });
         setEditingId(null);
         setShowForm(false);
     };
@@ -102,6 +104,21 @@ const Users = ({ onNavigate }) => {
                                     required
                                 />
                             </div>
+                            {!editingId && (
+                                <div className="form-group">
+                                    <label className="label">Senha</label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        className="input"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                        minLength={6}
+                                        placeholder="Mínimo 6 caracteres"
+                                    />
+                                </div>
+                            )}
                             <div className="form-group">
                                 <label className="label">{t.users.role}</label>
                                 <select

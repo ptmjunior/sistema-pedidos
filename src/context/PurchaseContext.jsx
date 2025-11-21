@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { createSubmissionNotifications, createApprovalNotifications, createRejectionNotifications } from '../utils/notificationService';
 
@@ -424,11 +425,50 @@ export const PurchaseProvider = ({ children }) => {
 
     const addUser = async (newUser) => {
         try {
-            const { error } = await supabase
-                .from('users')
-                .insert([newUser]);
+            // 1. Create Auth User (using a temporary client to avoid logging out current user)
+            // We use the ANON key here, which allows sign up if enabled in Supabase
+            const tempSupabase = createClient(
+                import.meta.env.VITE_SUPABASE_URL,
+                import.meta.env.VITE_SUPABASE_ANON_KEY,
+                { auth: { persistSession: false } } // Important: Don't persist this session
+            );
 
-            if (error) throw error;
+            const { data: authData, error: authError } = await tempSupabase.auth.signUp({
+                email: newUser.email,
+                password: newUser.password,
+                options: {
+                    data: {
+                        name: newUser.name,
+                        role: newUser.role,
+                        department: newUser.department
+                    }
+                }
+            });
+
+            if (authError) throw authError;
+
+            if (authData.user) {
+                // 2. Create Public Profile
+                // We use the main client (authenticated as admin/approver) to insert into public.users
+                // Note: The ID must match the Auth User ID
+                const { error: profileError } = await supabase
+                    .from('users')
+                    .insert([{
+                        id: authData.user.id, // Use the ID from Auth
+                        email: newUser.email,
+                        name: newUser.name,
+                        role: newUser.role,
+                        department: newUser.department
+                    }]);
+
+                if (profileError) {
+                    // If profile creation fails, we should ideally delete the auth user, but we can't do that easily from client.
+                    // For now, just throw error.
+                    console.error('Error creating user profile:', profileError);
+                    throw profileError;
+                }
+            }
+
             await loadUsers();
         } catch (error) {
             console.error('Error adding user:', error);
