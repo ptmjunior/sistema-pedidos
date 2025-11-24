@@ -37,7 +37,11 @@ export const PurchaseProvider = ({ children }) => {
     useEffect(() => {
         // Check active session on mount
         supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session?.user) {
+            // Check if this is a password recovery flow
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const type = hashParams.get('type');
+
+            if (session?.user && type !== 'recovery') {
                 loadUserProfile(session.user.id);
             } else {
                 setIsLoading(false);
@@ -45,12 +49,19 @@ export const PurchaseProvider = ({ children }) => {
         });
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            // Check if this is a password recovery flow
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const type = hashParams.get('type');
+
+            if (session?.user && type !== 'recovery') {
                 loadUserProfile(session.user.id);
-            } else {
+            } else if (!session?.user) {
                 setCurrentUser(null);
                 setIsAuthenticated(false);
+                setIsLoading(false);
+            } else {
+                // User session exists but in recovery mode - don't authenticate yet
                 setIsLoading(false);
             }
         });

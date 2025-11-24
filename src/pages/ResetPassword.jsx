@@ -57,8 +57,9 @@ const ResetPassword = ({ onNavigate }) => {
                 text: t.resetPassword.successMessage
             });
 
-            // Redirect to login after 2 seconds
-            setTimeout(() => {
+            // Sign out the user and redirect to login after 2 seconds
+            setTimeout(async () => {
+                await supabase.auth.signOut();
                 onNavigate('login');
             }, 2000);
 

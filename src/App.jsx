@@ -39,6 +39,13 @@ function App() {
 
   // Show login, forgot password, or reset password pages if not authenticated
   if (!isAuthenticated) {
+    // Check if this is a password recovery flow
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+
+    if (type === 'recovery') {
+      return <ResetPassword onNavigate={navigateTo} />;
+    }
     if (view === 'forgot-password') {
       return <ForgotPassword onNavigate={navigateTo} />;
     }
