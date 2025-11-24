@@ -7,6 +7,8 @@ import Users from './pages/Users';
 import Approvals from './pages/Approvals';
 import Notifications from './pages/Notifications';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import { PurchaseProvider, usePurchase } from './context/PurchaseContext';
 
 function AppWrapper() {
@@ -35,9 +37,15 @@ function App() {
     return requests.find(r => r.id === editingRequestId);
   };
 
-  // Show login page if not authenticated
+  // Show login, forgot password, or reset password pages if not authenticated
   if (!isAuthenticated) {
-    return <Login />;
+    if (view === 'forgot-password') {
+      return <ForgotPassword onNavigate={navigateTo} />;
+    }
+    if (view === 'reset-password') {
+      return <ResetPassword onNavigate={navigateTo} />;
+    }
+    return <Login onNavigate={navigateTo} />;
   }
 
   return (

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { translations as t } from '../utils/translations';
 
-const Login = () => {
+const Login = ({ onNavigate }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -83,6 +83,14 @@ const Login = () => {
                     </button>
                 </form>
 
+                <div className="login-footer">
+                    <button
+                        onClick={() => onNavigate('forgot-password')}
+                        className="text-primary hover:underline text-sm"
+                    >
+                        Esqueci minha senha
+                    </button>
+                </div>
 
             </div>
 

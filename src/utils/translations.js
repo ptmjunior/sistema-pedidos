@@ -10,7 +10,7 @@ export const translations = {
         users: 'Usuários',
         users: 'Usuários',
         logout: 'Sair',
-        appName: 'Sistema de Pedido de Compra'
+        appName: 'Pedido de Compra'
     },
 
     // Dashboard
@@ -211,6 +211,34 @@ export const translations = {
         filter: 'Filtrar',
         export: 'Exportar',
         import: 'Importar'
+    },
+
+    // Forgot Password
+    forgotPassword: {
+        title: 'Esqueci Minha Senha',
+        subtitle: 'Digite seu email para receber o link de recuperação',
+        email: 'Email',
+        emailPlaceholder: 'seu@email.com',
+        sendButton: 'Enviar Link de Recuperação',
+        sending: 'Enviando...',
+        successMessage: 'Email enviado! Verifique sua caixa de entrada.',
+        errorMessage: 'Erro ao enviar email. Tente novamente.',
+        backToLogin: '← Voltar para Login'
+    },
+
+    // Reset Password
+    resetPassword: {
+        title: 'Redefinir Senha',
+        subtitle: 'Digite sua nova senha',
+        newPassword: 'Nova Senha',
+        confirmPassword: 'Confirmar Senha',
+        passwordPlaceholder: 'Mínimo 6 caracteres',
+        updateButton: 'Atualizar Senha',
+        updating: 'Atualizando...',
+        successMessage: 'Senha atualizada com sucesso!',
+        errorMessage: 'Erro ao atualizar senha. Tente novamente.',
+        passwordMismatch: 'As senhas não coincidem',
+        redirecting: 'Redirecionando para login...'
     }
 };
 
