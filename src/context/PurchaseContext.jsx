@@ -433,6 +433,7 @@ export const PurchaseProvider = ({ children }) => {
                 { auth: { persistSession: false } } // Important: Don't persist this session
             );
 
+            console.log('Attempting to create Auth user:', newUser.email);
             const { data: authData, error: authError } = await tempSupabase.auth.signUp({
                 email: newUser.email,
                 password: newUser.password,
@@ -445,12 +446,16 @@ export const PurchaseProvider = ({ children }) => {
                 }
             });
 
-            if (authError) throw authError;
+            if (authError) {
+                console.error('Auth SignUp Error:', authError);
+                throw authError;
+            }
+
+            console.log('Auth user created:', authData);
 
             if (authData.user) {
                 // 2. Create Public Profile
-                // We use the main client (authenticated as admin/approver) to insert into public.users
-                // Note: The ID must match the Auth User ID
+                console.log('Attempting to create public profile for:', authData.user.id);
                 const { error: profileError } = await supabase
                     .from('users')
                     .insert([{
@@ -462,16 +467,16 @@ export const PurchaseProvider = ({ children }) => {
                     }]);
 
                 if (profileError) {
-                    // If profile creation fails, we should ideally delete the auth user, but we can't do that easily from client.
-                    // For now, just throw error.
-                    console.error('Error creating user profile:', profileError);
+                    console.error('Profile Creation Error:', profileError);
                     throw profileError;
                 }
+                console.log('Public profile created successfully');
             }
 
             await loadUsers();
         } catch (error) {
-            console.error('Error adding user:', error);
+            console.error('Error adding user (FINAL CATCH):', error);
+            alert(`Erro ao criar usuário: ${error.message}`); // Show alert to user
             throw error;
         }
     };
