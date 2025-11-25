@@ -386,101 +386,86 @@ export const PurchaseProvider = ({ children }) => {
                 if (itemsError) throw itemsError;
             }
 
-            // Reload requests
+            // Reload data
             await loadRequests();
+            if (currentUser) {
+                await loadNotifications(currentUser.id);
+            }
         } catch (error) {
-            console.error('Error updating request:', error);
+            console.error('Error updating status:', error);
             throw error;
         }
     };
 
-    const updateStatus = async (id, status) => {
+    const updateStatus = async (id, status, dates = null) => {
         try {
-            const request = requests.find(r => r.id === id);
-            if (!request) return;
-
-            // Update status
-            const { error } = await supabase
+            // Update request status
+            const { error: statusError } = await supabase
                 .from('purchase_requests')
                 .update({ status })
                 .eq('id', id);
 
-            if (error) throw error;
+            if (statusError) throw statusError;
 
-            // Create notifications
-            if (status === 'approved') {
-                const requester = users.find(u => u.id === request.userId);
-                const buyers = users.filter(u => u.role === 'buyer');
-                const recipients = [requester, ...buyers].filter(Boolean);
+            // Handle 'purchased' status with delivery dates
+            if (status === 'purchased' && dates) {
+                // Update delivery dates for items
+                const updatePromises = Object.entries(dates).map(([itemId, date]) =>
+                    supabase
+                        .from('request_items')
+                        .update({ estimated_delivery_date: date })
+                        .eq('id', itemId)
+                );
 
-                if (recipients.length > 0) {
-                    const approvalNotifications = recipients.map(recipient => ({
-                        recipient_id: recipient.id,
-                        type: 'approval',
-                        subject: `Pedido aprovado`,
-                        message: `<p>O pedido <strong>${request.desc}</strong> foi aprovado por ${currentUser.name}.</p><p>Valor: R$ ${request.amount.toFixed(2)}</p>`,
-                        request_id: id
-                    }));
+                await Promise.all(updatePromises);
+            }
 
-                    await supabase
-                        .from('notifications')
-                        .insert(approvalNotifications);
-
-                    // Send email notification
-                    try {
-                        await fetch('/api/send-email', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                type: 'approval',
-                                request: {
-                                    id: request.id,
-                                    desc: request.desc,
-                                    amount: request.amount
-                                },
-                                requesterName: requester?.name || 'Usuário',
-                                approverName: currentUser.name,
-                                recipients: recipients.map(r => r.email)
-                            })
-                        });
-                        console.log('Approval email sent');
-                    } catch (emailError) {
-                        console.error('Error sending approval email:', emailError);
-                    }
-                }
-            } else if (status === 'rejected') {
-                const requester = users.find(u => u.id === request.userId);
-                if (requester) {
+            // Get request details for notifications
+            const request = requests.find(r => r.id === id);
+            if (request) {
+                // Create notifications based on status
+                if (status === 'approved') {
+                    await createApprovalNotifications(request, currentUser, users, supabase);
+                } else if (status === 'rejected') {
+                    await createRejectionNotifications(request, currentUser, users, supabase);
+                } else if (status === 'purchased') {
+                    // Create notification for requester
                     await supabase
                         .from('notifications')
                         .insert([{
-                            recipient_id: requester.id,
-                            type: 'rejection',
-                            subject: `Pedido rejeitado`,
-                            message: `<p>O pedido <strong>${request.desc}</strong> foi rejeitado por ${currentUser.name}.</p>`,
-                            request_id: id
+                            recipient_id: request.userId,
+                            type: 'purchased',
+                            subject: `Pedido Comprado`,
+                            message: `<p>Seu pedido <strong>${request.desc}</strong> foi comprado.</p>`,
+                            request_id: request.id
                         }]);
 
-                    // Send email notification
+                    // Send email
                     try {
-                        await fetch('/api/send-email', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                type: 'rejection',
-                                request: {
-                                    id: request.id,
-                                    desc: request.desc,
-                                    amount: request.amount
-                                },
-                                requesterName: requester.name,
-                                approverName: currentUser.name,
-                                recipients: [requester.email]
-                            })
-                        });
-                        console.log('Rejection email sent');
+                        // Get requester email
+                        const requester = users.find(u => u.id === request.userId);
+                        if (requester && requester.email) {
+                            await fetch('/api/send-email', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    type: 'purchased',
+                                    request: {
+                                        ...request,
+                                        items: request.items.map(item => ({
+                                            ...item,
+                                            deliveryDate: dates ? dates[item.id] : null
+                                        }))
+                                    },
+                                    requesterName: request.user,
+                                    recipients: [requester.email],
+                                    cc: []
+                                })
+                            });
+                            console.log('Purchased email sent');
+                        }
                     } catch (emailError) {
-                        console.error('Error sending rejection email:', emailError);
+                        console.error('Error sending purchased email:', emailError);
                     }
                 }
             }

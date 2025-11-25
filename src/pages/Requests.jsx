@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import Layout from '../components/Layout';
-import { usePurchase } from '../context/PurchaseContext';
-import { generatePOId } from '../utils/formatters';
-import { translations as t } from '../utils/translations';
+import PurchaseConfirmationModal from '../components/PurchaseConfirmationModal';
 
 const Requests = ({ onNavigate }) => {
     const { requests, currentUser, updateStatus } = usePurchase();
     const [filter, setFilter] = useState('all');
+    const [purchasingRequest, setPurchasingRequest] = useState(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // Role-based filtering logic
     let visibleRequests = requests;
@@ -24,6 +22,19 @@ const Requests = ({ onNavigate }) => {
     const filteredRequests = filter === 'all'
         ? visibleRequests
         : visibleRequests.filter(r => r.status === filter);
+
+    const handlePurchaseConfirm = async (dates) => {
+        setIsProcessing(true);
+        try {
+            await updateStatus(purchasingRequest.id, 'purchased', dates);
+            setPurchasingRequest(null);
+        } catch (error) {
+            console.error('Error marking as purchased:', error);
+            alert('Erro ao marcar como comprado. Tente novamente.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     return (
         <Layout onNavigate={onNavigate} currentPath="requests">
@@ -91,11 +102,7 @@ const Requests = ({ onNavigate }) => {
                                         {/* Buyer can mark approved as purchased */}
                                         {currentUser.role === 'buyer' && req.status === 'approved' && (
                                             <button
-                                                onClick={async () => {
-                                                    if (window.confirm('Marcar este pedido como comprado?')) {
-                                                        await updateStatus(req.id, 'purchased');
-                                                    }
-                                                }}
+                                                onClick={() => setPurchasingRequest(req)}
                                                 className="btn-text text-success"
                                             >
                                                 ✓ Marcar como Comprado
@@ -122,6 +129,15 @@ const Requests = ({ onNavigate }) => {
                     </table>
                 )}
             </div>
+
+            {purchasingRequest && (
+                <PurchaseConfirmationModal
+                    request={purchasingRequest}
+                    onClose={() => setPurchasingRequest(null)}
+                    onConfirm={handlePurchaseConfirm}
+                    isProcessing={isProcessing}
+                />
+            )}
 
             <style>{`
                 .status-badge {

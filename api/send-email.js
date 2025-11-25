@@ -38,6 +38,9 @@ export default async function handler(req, res) {
             case 'rejection':
                 emailData = emailTemplates.rejection(request, requesterName, approverName);
                 break;
+            case 'purchased':
+                emailData = emailTemplates.purchased(request, requesterName);
+                break;
             default:
                 return res.status(400).json({ error: 'Invalid email type' });
         }
