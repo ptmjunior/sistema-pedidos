@@ -7,6 +7,8 @@ const Users = ({ onNavigate }) => {
     const { users, addUser, updateUser, deleteUser, currentUser } = usePurchase();
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -27,14 +29,33 @@ const Users = ({ onNavigate }) => {
         );
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (editingId) {
-            updateUser(editingId, formData);
-        } else {
-            addUser(formData);
+        setIsLoading(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            if (editingId) {
+                await updateUser(editingId, formData);
+                setMessage({ type: 'success', text: 'Usuário atualizado com sucesso!' });
+            } else {
+                await addUser(formData);
+                setMessage({ type: 'success', text: 'Usuário criado com sucesso!' });
+            }
+
+            // Wait a bit to show the message, then reset
+            setTimeout(() => {
+                resetForm();
+            }, 2000);
+        } catch (error) {
+            console.error('Error saving user:', error);
+            setMessage({
+                type: 'error',
+                text: error.message || 'Erro ao salvar usuário. Tente novamente.'
+            });
+        } finally {
+            setIsLoading(false);
         }
-        resetForm();
     };
 
     const handleEdit = (user) => {
@@ -144,9 +165,18 @@ const Users = ({ onNavigate }) => {
                                 />
                             </div>
                         </div>
+
+                        {message.text && (
+                            <div className={`message-box ${message.type}`}>
+                                {message.text}
+                            </div>
+                        )}
+
                         <div className="flex justify-end gap-sm">
-                            <button type="button" onClick={resetForm} className="btn btn-secondary">{t.users.cancel}</button>
-                            <button type="submit" className="btn btn-primary">{t.users.save}</button>
+                            <button type="button" onClick={resetForm} className="btn btn-secondary" disabled={isLoading}>{t.users.cancel}</button>
+                            <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                                {isLoading ? 'Salvando...' : t.users.save}
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -212,6 +242,22 @@ const Users = ({ onNavigate }) => {
         .role-buyer { background-color: #ffedd5; color: #c2410c; }
         .text-red-600 { color: #dc2626; }
         .mr-sm { margin-right: var(--spacing-sm); }
+        .message-box {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-sm);
+        }
+        .message-box.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .message-box.error {
+            background-color: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
       `}</style>
         </Layout>
     );
