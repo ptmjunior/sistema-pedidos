@@ -315,6 +315,7 @@ export const PurchaseProvider = ({ children }) => {
                             type: 'submission',
                             request: {
                                 id: request.id,
+                                createdAt: request.created_at,
                                 desc: newRequest.desc,
                                 amount: totalAmount,
                                 department: currentUser.department,

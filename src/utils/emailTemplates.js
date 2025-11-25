@@ -1,14 +1,27 @@
+import { generatePOId } from './formatters.js';
+
 export const emailTemplates = {
     // Template: Pedido Submetido (para Aprovadores)
-    submission: (request, requesterName) => ({
-        subject: `📋 Novo Pedido Aguardando Aprovação - ${request.id}`,
-        html: `
+    submission: (request, requesterName) => {
+        const poId = generatePOId(request.createdAt);
+        const itemsHtml = request.items?.map(item => `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 12px; color: #333;">${item.desc}</td>
+                <td style="padding: 12px; text-align: center; color: #666;">${item.qty}</td>
+                <td style="padding: 12px; text-align: right; color: #333;">R$ ${parseFloat(item.total).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+        `).join('') || '';
+
+        return {
+            subject: `📋 Novo Pedido Aguardando Aprovação - ${poId}`,
+            html: `
             <!DOCTYPE html>
             <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                     <div style="background-color: #2563eb; color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
                         <h1 style="margin: 0; font-size: 24px;">🔔 Novo Pedido de Compra</h1>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9;">${poId}</p>
                     </div>
                     <div style="background-color: #ffffff; padding: 32px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <p style="margin-top: 0;">Olá,</p>
@@ -27,14 +40,26 @@ export const emailTemplates = {
                                 <span style="font-weight: 600; color: #64748b;">Departamento:</span>
                                 <span style="font-weight: 500;">${request.department || 'N/A'}</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-                                <span style="font-weight: 600; color: #64748b;">Itens:</span>
-                                <span style="font-weight: 500;">${request.items?.length || 0} item(ns)</span>
-                            </div>
                             <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: none;">
                                 <span style="font-weight: 600; color: #64748b;">Valor Total:</span>
                                 <span style="font-size: 18px; font-weight: bold; color: #2563eb;">R$ ${request.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
+                        </div>
+
+                        <div style="margin: 24px 0;">
+                            <h3 style="color: #4b5563; font-size: 16px; margin-bottom: 12px;">Itens do Pedido:</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <thead>
+                                    <tr style="background-color: #f1f5f9; text-align: left;">
+                                        <th style="padding: 12px; border-radius: 6px 0 0 6px; color: #64748b;">Item</th>
+                                        <th style="padding: 12px; text-align: center; color: #64748b;">Qtd</th>
+                                        <th style="padding: 12px; text-align: right; border-radius: 0 6px 6px 0; color: #64748b;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${itemsHtml}
+                                </tbody>
+                            </table>
                         </div>
                         
                         <div style="text-align: center; margin-top: 32px;">
@@ -51,19 +76,31 @@ export const emailTemplates = {
                 </div>
             </body>
             </html>
-        `
-    }),
+            `
+        };
+    },
 
     // Template: Pedido Aprovado (para Solicitante + Comprador)
-    approval: (request, requesterName, approverName) => ({
-        subject: `✅ Pedido Aprovado - ${request.id}`,
-        html: `
+    approval: (request, requesterName, approverName) => {
+        const poId = generatePOId(request.createdAt);
+        const itemsHtml = request.items?.map(item => `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 12px; color: #333;">${item.desc}</td>
+                <td style="padding: 12px; text-align: center; color: #666;">${item.qty}</td>
+                <td style="padding: 12px; text-align: right; color: #333;">R$ ${parseFloat(item.total).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+        `).join('') || '';
+
+        return {
+            subject: `✅ Pedido Aprovado - ${poId}`,
+            html: `
             <!DOCTYPE html>
             <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                     <div style="background-color: #16a34a; color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
                         <h1 style="margin: 0; font-size: 24px;">✅ Pedido Aprovado!</h1>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9;">${poId}</p>
                     </div>
                     <div style="background-color: #ffffff; padding: 32px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <div style="background-color: #dcfce7; padding: 20px; margin-bottom: 24px; border-radius: 8px; border-left: 4px solid #16a34a;">
@@ -85,6 +122,24 @@ export const emailTemplates = {
                                 <span style="font-size: 18px; font-weight: bold; color: #16a34a;">R$ ${request.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                         </div>
+
+                        ${itemsHtml ? `
+                        <div style="margin: 24px 0;">
+                            <h3 style="color: #4b5563; font-size: 16px; margin-bottom: 12px;">Itens do Pedido:</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <thead>
+                                    <tr style="background-color: #f1f5f9; text-align: left;">
+                                        <th style="padding: 12px; border-radius: 6px 0 0 6px; color: #64748b;">Item</th>
+                                        <th style="padding: 12px; text-align: center; color: #64748b;">Qtd</th>
+                                        <th style="padding: 12px; text-align: right; border-radius: 0 6px 6px 0; color: #64748b;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${itemsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                        ` : ''}
                         
                         <div style="text-align: center; margin-top: 32px;">
                             <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" style="display: inline-block; background-color: #16a34a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
@@ -100,19 +155,23 @@ export const emailTemplates = {
                 </div>
             </body>
             </html>
-        `
-    }),
+            `
+        };
+    },
 
     // Template: Pedido Rejeitado (para Solicitante)
-    rejection: (request, requesterName, approverName) => ({
-        subject: `❌ Pedido Rejeitado - ${request.id}`,
-        html: `
+    rejection: (request, requesterName, approverName) => {
+        const poId = generatePOId(request.createdAt);
+        return {
+            subject: `❌ Pedido Rejeitado - ${poId}`,
+            html: `
             <!DOCTYPE html>
             <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                     <div style="background-color: #dc2626; color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
                         <h1 style="margin: 0; font-size: 24px;">❌ Pedido Não Aprovado</h1>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9;">${poId}</p>
                     </div>
                     <div style="background-color: #ffffff; padding: 32px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <div style="background-color: #fee2e2; padding: 20px; margin-bottom: 24px; border-radius: 8px; border-left: 4px solid #dc2626;">
@@ -151,8 +210,12 @@ export const emailTemplates = {
                 </div>
             </body>
             </html>
-        `
-    })
+            `
+        };
+    }
+};
+
+export default emailTemplates;
 };
 
 export default emailTemplates;
