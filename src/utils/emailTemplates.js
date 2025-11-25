@@ -5,64 +5,47 @@ export const emailTemplates = {
         html: `
             <!DOCTYPE html>
             <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-                    .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-                    .info-box { background-color: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #2563eb; }
-                    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
-                    .info-row:last-child { border-bottom: none; }
-                    .label { font-weight: 600; color: #6b7280; }
-                    .value { font-weight: 500; }
-                    .amount { font-size: 24px; font-weight: bold; color: #2563eb; }
-                    .button { display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
-                    .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>🔔 Novo Pedido de Compra</h1>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background-color: #2563eb; color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <h1 style="margin: 0; font-size: 24px;">🔔 Novo Pedido de Compra</h1>
                     </div>
-                    <div class="content">
-                        <p>Olá,</p>
+                    <div style="background-color: #ffffff; padding: 32px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <p style="margin-top: 0;">Olá,</p>
                         <p>Um novo pedido foi submetido e está aguardando sua aprovação:</p>
                         
-                        <div class="info-box">
-                            <div class="info-row">
-                                <span class="label">Solicitante:</span>
-                                <span class="value">${requesterName}</span>
+                        <div style="background-color: #f8fafc; padding: 20px; margin: 24px 0; border-radius: 8px; border-left: 4px solid #2563eb;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Solicitante:</span>
+                                <span style="font-weight: 500;">${requesterName}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="label">Descrição:</span>
-                                <span class="value">${request.desc}</span>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Descrição:</span>
+                                <span style="font-weight: 500;">${request.desc}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="label">Departamento:</span>
-                                <span class="value">${request.department || 'N/A'}</span>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Departamento:</span>
+                                <span style="font-weight: 500;">${request.department || 'N/A'}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="label">Itens:</span>
-                                <span class="value">${request.items?.length || 0} item(ns)</span>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Itens:</span>
+                                <span style="font-weight: 500;">${request.items?.length || 0} item(ns)</span>
                             </div>
-                            <div class="info-row">
-                                <span class="label">Valor Total:</span>
-                                <span class="amount">R$ ${request.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: none;">
+                                <span style="font-weight: 600; color: #64748b;">Valor Total:</span>
+                                <span style="font-size: 18px; font-weight: bold; color: #2563eb;">R$ ${request.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                         </div>
                         
-                        <p style="text-align: center;">
-                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" class="button">
+                        <div style="text-align: center; margin-top: 32px;">
+                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                                 Ver Detalhes e Aprovar
                             </a>
-                        </p>
+                        </div>
                         
-                        <div class="footer">
-                            <p>Sistema de Pedidos de Compra - Casa das Tintas</p>
-                            <p>Esta é uma mensagem automática, por favor não responda.</p>
+                        <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                            <p style="margin: 4px 0;">Sistema de Pedidos de Compra - Casa das Tintas</p>
+                            <p style="margin: 4px 0;">Esta é uma mensagem automática, por favor não responda.</p>
                         </div>
                     </div>
                 </div>
@@ -77,59 +60,41 @@ export const emailTemplates = {
         html: `
             <!DOCTYPE html>
             <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background-color: #16a34a; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-                    .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-                    .success-box { background-color: #dcfce7; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #16a34a; }
-                    .info-box { background-color: white; padding: 20px; margin: 20px 0; border-radius: 8px; }
-                    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
-                    .info-row:last-child { border-bottom: none; }
-                    .label { font-weight: 600; color: #6b7280; }
-                    .value { font-weight: 500; }
-                    .amount { font-size: 24px; font-weight: bold; color: #16a34a; }
-                    .button { display: inline-block; background-color: #16a34a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
-                    .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>✅ Pedido Aprovado!</h1>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background-color: #16a34a; color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <h1 style="margin: 0; font-size: 24px;">✅ Pedido Aprovado!</h1>
                     </div>
-                    <div class="content">
-                        <div class="success-box">
-                            <h3 style="margin-top: 0; color: #15803d;">🎉 Boa notícia!</h3>
-                            <p style="margin-bottom: 0;">Seu pedido foi aprovado por <strong>${approverName}</strong> e será processado pela equipe de compras.</p>
+                    <div style="background-color: #ffffff; padding: 32px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="background-color: #dcfce7; padding: 20px; margin-bottom: 24px; border-radius: 8px; border-left: 4px solid #16a34a;">
+                            <h3 style="margin-top: 0; color: #15803d; margin-bottom: 8px;">🎉 Boa notícia!</h3>
+                            <p style="margin: 0; color: #14532d;">Seu pedido foi aprovado por <strong>${approverName}</strong> e será processado pela equipe de compras.</p>
                         </div>
                         
-                        <div class="info-box">
-                            <div class="info-row">
-                                <span class="label">Solicitante:</span>
-                                <span class="value">${requesterName}</span>
+                        <div style="background-color: #f8fafc; padding: 20px; margin: 24px 0; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Solicitante:</span>
+                                <span style="font-weight: 500;">${requesterName}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="label">Descrição:</span>
-                                <span class="value">${request.desc}</span>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Descrição:</span>
+                                <span style="font-weight: 500;">${request.desc}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="label">Valor Total:</span>
-                                <span class="amount">R$ ${request.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: none;">
+                                <span style="font-weight: 600; color: #64748b;">Valor Total:</span>
+                                <span style="font-size: 18px; font-weight: bold; color: #16a34a;">R$ ${request.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                         </div>
                         
-                        <p style="text-align: center;">
-                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" class="button">
+                        <div style="text-align: center; margin-top: 32px;">
+                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" style="display: inline-block; background-color: #16a34a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                                 Acessar Sistema
                             </a>
-                        </p>
+                        </div>
                         
-                        <div class="footer">
-                            <p>Sistema de Pedidos de Compra - Casa das Tintas</p>
-                            <p>Esta é uma mensagem automática, por favor não responda.</p>
+                        <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                            <p style="margin: 4px 0;">Sistema de Pedidos de Compra - Casa das Tintas</p>
+                            <p style="margin: 4px 0;">Esta é uma mensagem automática, por favor não responda.</p>
                         </div>
                     </div>
                 </div>
@@ -144,60 +109,43 @@ export const emailTemplates = {
         html: `
             <!DOCTYPE html>
             <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background-color: #dc2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-                    .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-                    .warning-box { background-color: #fee2e2; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #dc2626; }
-                    .info-box { background-color: white; padding: 20px; margin: 20px 0; border-radius: 8px; }
-                    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
-                    .info-row:last-child { border-bottom: none; }
-                    .label { font-weight: 600; color: #6b7280; }
-                    .value { font-weight: 500; }
-                    .button { display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
-                    .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>❌ Pedido Não Aprovado</h1>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background-color: #dc2626; color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <h1 style="margin: 0; font-size: 24px;">❌ Pedido Não Aprovado</h1>
                     </div>
-                    <div class="content">
-                        <div class="warning-box">
-                            <h3 style="margin-top: 0; color: #b91c1c;">Pedido Rejeitado</h3>
-                            <p style="margin-bottom: 0;">Seu pedido foi rejeitado por <strong>${approverName}</strong>. Entre em contato com o aprovador para mais detalhes.</p>
+                    <div style="background-color: #ffffff; padding: 32px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="background-color: #fee2e2; padding: 20px; margin-bottom: 24px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                            <h3 style="margin-top: 0; color: #b91c1c; margin-bottom: 8px;">Pedido Rejeitado</h3>
+                            <p style="margin: 0; color: #7f1d1d;">Seu pedido foi rejeitado por <strong>${approverName}</strong>.</p>
                         </div>
                         
-                        <div class="info-box">
-                            <div class="info-row">
-                                <span class="label">Solicitante:</span>
-                                <span class="value">${requesterName}</span>
+                        <div style="background-color: #f8fafc; padding: 20px; margin: 24px 0; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Solicitante:</span>
+                                <span style="font-weight: 500;">${requesterName}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="label">Descrição:</span>
-                                <span class="value">${request.desc}</span>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Descrição:</span>
+                                <span style="font-weight: 500;">${request.desc}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="label">Valor:</span>
-                                <span class="value">R$ ${request.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: none;">
+                                <span style="font-weight: 600; color: #64748b;">Valor:</span>
+                                <span style="font-size: 18px; font-weight: bold; color: #dc2626;">R$ ${request.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                         </div>
                         
-                        <p>Você pode revisar o pedido e submetê-lo novamente se necessário.</p>
+                        <p style="color: #4b5563;">Você pode revisar o pedido e submetê-lo novamente se necessário.</p>
                         
-                        <p style="text-align: center;">
-                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" class="button">
+                        <div style="text-align: center; margin-top: 32px;">
+                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                                 Acessar Sistema
                             </a>
-                        </p>
+                        </div>
                         
-                        <div class="footer">
-                            <p>Sistema de Pedidos de Compra - Casa das Tintas</p>
-                            <p>Esta é uma mensagem automática, por favor não responda.</p>
+                        <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                            <p style="margin: 4px 0;">Sistema de Pedidos de Compra - Casa das Tintas</p>
+                            <p style="margin: 4px 0;">Esta é uma mensagem automática, por favor não responda.</p>
                         </div>
                     </div>
                 </div>
