@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
+import ApprovalModal from '../components/ApprovalModal';
 import { usePurchase } from '../context/PurchaseContext';
 import { generatePOId } from '../utils/formatters';
 import { translations as t } from '../utils/translations';
@@ -8,14 +9,20 @@ const Approvals = ({ onNavigate }) => {
     const { requests, updateStatus } = usePurchase();
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [modalAction, setModalAction] = useState(null);
 
     const pendingRequests = requests.filter(req => req.status === 'pending');
 
-    const handleAction = async (id, action) => {
+    const handleActionClick = (action) => {
+        setModalAction(action);
+    };
+
+    const handleConfirmAction = async (comments) => {
         setIsProcessing(true);
         try {
-            await updateStatus(id, action);
+            await updateStatus(selectedRequest.id, modalAction, null, comments);
             setSelectedRequest(null);
+            setModalAction(null);
         } catch (error) {
             console.error('Error updating status:', error);
             alert('Erro ao atualizar pedido. Tente novamente.');
@@ -49,14 +56,14 @@ const Approvals = ({ onNavigate }) => {
                                 ) : (
                                     <>
                                         <button
-                                            onClick={() => handleAction(selectedRequest.id, 'rejected')}
+                                            onClick={() => handleActionClick('rejected')}
                                             className="btn btn-secondary text-red-600 border-red-200 hover:bg-red-50"
                                             disabled={isProcessing}
                                         >
                                             {t.approvals.rejectRequest}
                                         </button>
                                         <button
-                                            onClick={() => handleAction(selectedRequest.id, 'approved')}
+                                            onClick={() => handleActionClick('approved')}
                                             className="btn btn-primary"
                                             disabled={isProcessing}
                                         >
@@ -215,6 +222,16 @@ const Approvals = ({ onNavigate }) => {
                     </>
                 )}
             </div>
+
+            {modalAction && selectedRequest && (
+                <ApprovalModal
+                    request={selectedRequest}
+                    action={modalAction}
+                    onClose={() => setModalAction(null)}
+                    onConfirm={handleConfirmAction}
+                    isProcessing={isProcessing}
+                />
+            )}
 
             <style>{`
                 .max-w-7xl { max-width: 80rem; }
