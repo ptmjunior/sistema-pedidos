@@ -7,12 +7,21 @@ import { translations as t } from '../utils/translations';
 const Approvals = ({ onNavigate }) => {
     const { requests, updateStatus } = usePurchase();
     const [selectedRequest, setSelectedRequest] = useState(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const pendingRequests = requests.filter(req => req.status === 'pending');
 
-    const handleAction = (id, action) => {
-        updateStatus(id, action);
-        setSelectedRequest(null);
+    const handleAction = async (id, action) => {
+        setIsProcessing(true);
+        try {
+            await updateStatus(id, action);
+            setSelectedRequest(null);
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Erro ao atualizar pedido. Tente novamente.');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -32,18 +41,29 @@ const Approvals = ({ onNavigate }) => {
                                 <h1 className="text-2xl font-bold">{t.approvals.analyzeRequest}</h1>
                             </div>
                             <div className="flex gap-md">
-                                <button
-                                    onClick={() => handleAction(selectedRequest.id, 'rejected')}
-                                    className="btn btn-secondary text-red-600 border-red-200 hover:bg-red-50"
-                                >
-                                    {t.approvals.rejectRequest}
-                                </button>
-                                <button
-                                    onClick={() => handleAction(selectedRequest.id, 'approved')}
-                                    className="btn btn-primary"
-                                >
-                                    {t.approvals.approveRequest}
-                                </button>
+                                {isProcessing ? (
+                                    <div className="processing-message">
+                                        <div className="spinner"></div>
+                                        <span>Processando...</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => handleAction(selectedRequest.id, 'rejected')}
+                                            className="btn btn-secondary text-red-600 border-red-200 hover:bg-red-50"
+                                            disabled={isProcessing}
+                                        >
+                                            {t.approvals.rejectRequest}
+                                        </button>
+                                        <button
+                                            onClick={() => handleAction(selectedRequest.id, 'approved')}
+                                            className="btn btn-primary"
+                                            disabled={isProcessing}
+                                        >
+                                            {t.approvals.approveRequest}
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -292,6 +312,30 @@ const Approvals = ({ onNavigate }) => {
                     opacity: 1;
                     transform: translateY(0);
                   }
+                }
+                
+                .processing-message {
+                  display: flex;
+                  align-items: center;
+                  gap: var(--spacing-sm);
+                  padding: 0.75rem 1.5rem;
+                  background-color: #eff6ff;
+                  color: #1e40af;
+                  border-radius: var(--radius-md);
+                  font-weight: 500;
+                }
+                
+                .spinner {
+                  width: 20px;
+                  height: 20px;
+                  border: 3px solid #dbeafe;
+                  border-top-color: #1e40af;
+                  border-radius: 50%;
+                  animation: spin 0.8s linear infinite;
+                }
+                
+                @keyframes spin {
+                  to { transform: rotate(360deg); }
                 }
               `}</style>
         </Layout>
