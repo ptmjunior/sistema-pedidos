@@ -192,6 +192,7 @@ export const translations = {
     status: {
         pending: 'Pendente',
         approved: 'Aprovado',
+        purchased: 'Comprado',
         rejected: 'Rejeitado'
     },
 

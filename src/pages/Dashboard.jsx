@@ -122,6 +122,7 @@ const Dashboard = ({ onNewRequest, onNavigate, currentPath }) => {
                 
                 .status-pending { background-color: #fff7ed; color: #c2410c; }
                 .status-approved { background-color: #dcfce7; color: #15803d; }
+                .status-purchased { background-color: #dbeafe; color: #1e40af; }
                 .status-rejected { background-color: #fee2e2; color: #b91c1c; }
               `}</style>
         </Layout>

@@ -5,7 +5,7 @@ import { generatePOId } from '../utils/formatters';
 import { translations as t } from '../utils/translations';
 
 const Requests = ({ onNavigate }) => {
-    const { requests, currentUser } = usePurchase();
+    const { requests, currentUser, updateStatus } = usePurchase();
     const [filter, setFilter] = useState('all');
 
     // Role-based filtering logic
@@ -40,6 +40,7 @@ const Requests = ({ onNavigate }) => {
                         <option value="all">{t.requests.allStatus}</option>
                         <option value="pending">{t.status.pending}</option>
                         <option value="approved">{t.status.approved}</option>
+                        <option value="purchased">{t.status.purchased || 'Comprado'}</option>
                         <option value="rejected">{t.status.rejected}</option>
                     </select>
                 </div>
@@ -87,6 +88,20 @@ const Requests = ({ onNavigate }) => {
                                     </td>
                                     <td className="p-md text-muted text-sm">{req.deliveryDate || 'N/A'}</td>
                                     <td className="p-md flex gap-sm">
+                                        {/* Buyer can mark approved as purchased */}
+                                        {currentUser.role === 'buyer' && req.status === 'approved' && (
+                                            <button
+                                                onClick={async () => {
+                                                    if (window.confirm('Marcar este pedido como comprado?')) {
+                                                        await updateStatus(req.id, 'purchased');
+                                                    }
+                                                }}
+                                                className="btn-text text-success"
+                                            >
+                                                ✓ Marcar como Comprado
+                                            </button>
+                                        )}
+
                                         {/* Only allow editing if it's the user's own request and pending, or if user is approver */}
                                         {(currentUser.id === req.userId && req.status === 'pending') || currentUser.role === 'approver' ? (
                                             <button
@@ -95,6 +110,8 @@ const Requests = ({ onNavigate }) => {
                                             >
                                                 {t.requests.edit}
                                             </button>
+                                        ) : req.status === 'purchased' ? (
+                                            <span className="text-xs text-success">✓ Comprado</span>
                                         ) : (
                                             <span className="text-xs text-muted">{t.requests.viewOnly}</span>
                                         )}
@@ -115,9 +132,11 @@ const Requests = ({ onNavigate }) => {
                 }
                 .status-pending { background-color: #fff7ed; color: #c2410c; }
                 .status-approved { background-color: #dcfce7; color: #15803d; }
+                .status-purchased { background-color: #dbeafe; color: #1e40af; }
                 .status-rejected { background-color: #fee2e2; color: #b91c1c; }
                 .btn-text { background: none; border: none; padding: 0; font-weight: 500; cursor: pointer; }
                 .text-primary { color: var(--color-primary); }
+                .text-success { color: #15803d; }
                 .bg-slate-50 { background-color: #f8fafc; }
                 .transition-colors { transition: background-color 0.2s; }
                 
