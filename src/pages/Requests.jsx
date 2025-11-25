@@ -1,3 +1,8 @@
+import React, { useState } from 'react';
+import Layout from '../components/Layout';
+import { usePurchase } from '../context/PurchaseContext';
+import { translations as t } from '../utils/translations';
+import { generatePOId } from '../utils/formatters';
 import PurchaseConfirmationModal from '../components/PurchaseConfirmationModal';
 
 const Requests = ({ onNavigate }) => {
