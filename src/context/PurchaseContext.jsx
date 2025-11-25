@@ -56,6 +56,14 @@ export const PurchaseProvider = ({ children }) => {
                 setIsLoading(false);
                 return;
             }
+
+            // Check if we're in recovery mode - don't authenticate
+            const isRecoveryMode = localStorage.getItem('password_recovery_active') === 'true';
+            if (isRecoveryMode) {
+                setIsLoading(false);
+                return;
+            }
+
             // Check if this is a password recovery flow
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const type = hashParams.get('type');
