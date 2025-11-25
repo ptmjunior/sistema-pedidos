@@ -12,7 +12,7 @@ const Dashboard = ({ onNewRequest, onNavigate, currentPath }) => {
     if (currentUser.role === 'requester') {
         visibleRequests = requests.filter(r => r.userId === currentUser.id);
     } else if (currentUser.role === 'buyer') {
-        visibleRequests = requests.filter(r => r.status === 'approved');
+        visibleRequests = requests.filter(r => r.status === 'approved' || r.status === 'purchased');
     }
 
     // Recalculate stats based on visibility
