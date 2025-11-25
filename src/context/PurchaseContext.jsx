@@ -508,9 +508,15 @@ export const PurchaseProvider = ({ children }) => {
 
     const updateUser = async (id, updatedData) => {
         try {
+            // Remove password field - passwords are managed by Supabase Auth, not in users table
+            const { password, ...dataWithoutPassword } = updatedData;
+
+            // Note: Password updates for other users require Admin API (not implemented)
+            // Admins can reset passwords manually via Supabase Dashboard
+
             const { error } = await supabase
                 .from('users')
-                .update(updatedData)
+                .update(dataWithoutPassword)
                 .eq('id', id);
 
             if (error) throw error;
