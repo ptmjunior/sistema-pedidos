@@ -38,7 +38,12 @@ const Login = ({ onNavigate }) => {
         <div className="login-container">
             <div className="login-card card">
                 <div className="login-header">
-                    <h1 className="text-3xl font-bold mb-xs">🎨 {t.login.title}</h1>
+                    <img
+                        src="/logo.png"
+                        alt="Casa das Tintas"
+                        className="login-logo"
+                    />
+                    <h1 className="text-3xl font-bold mb-xs">{t.login.title}</h1>
                     <p className="text-muted">{t.login.subtitle}</p>
                 </div>
 
@@ -114,6 +119,14 @@ const Login = ({ onNavigate }) => {
                 .login-header {
                     text-align: center;
                     margin-bottom: var(--spacing-xl);
+                }
+
+                .login-logo {
+                    height: 80px;
+                    width: auto;
+                    margin: 0 auto var(--spacing-md);
+                    display: block;
+                    object-fit: contain;
                 }
 
                 .login-form {
