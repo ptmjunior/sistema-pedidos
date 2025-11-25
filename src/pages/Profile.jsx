@@ -72,7 +72,12 @@ const Profile = ({ onNavigate }) => {
                 newPassword: '',
                 confirmPassword: ''
             });
-            setIsChangingPassword(false);
+
+            // Close form after showing message for 3 seconds
+            setTimeout(() => {
+                setIsChangingPassword(false);
+                setMessage({ type: '', text: '' });
+            }, 3000);
 
         } catch (error) {
             console.error('Error changing password:', error);
