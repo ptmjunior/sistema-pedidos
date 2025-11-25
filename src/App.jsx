@@ -6,6 +6,7 @@ import Vendors from './pages/Vendors';
 import Users from './pages/Users';
 import Approvals from './pages/Approvals';
 import Notifications from './pages/Notifications';
+import Profile from './pages/Profile';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -82,6 +83,11 @@ function App() {
       )}
       {view === 'approvals' && (
         <Approvals
+          onNavigate={navigateTo}
+        />
+      )}
+      {view === 'profile' && (
+        <Profile
           onNavigate={navigateTo}
         />
       )}

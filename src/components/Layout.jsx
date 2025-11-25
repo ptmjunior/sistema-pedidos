@@ -77,6 +77,15 @@ const Layout = ({ children, onNavigate, currentPath }) => {
                             {t.nav.vendors}
                         </button>
                     )}
+
+                    {/* Profile - Available to all users */}
+                    <div className="mt-md" />
+                    <button
+                        className={`nav-item ${currentPath === 'profile' ? 'active' : ''}`}
+                        onClick={() => onNavigate('profile')}
+                    >
+                        👤 Meu Perfil
+                    </button>
                 </nav>
 
                 <div className="user-profile mt-auto pt-md border-t">
@@ -168,6 +177,7 @@ const Layout = ({ children, onNavigate, currentPath }) => {
         }
         
         .mt-auto { margin-top: auto; }
+        .mt-md { margin-top: var(--spacing-md); }
         .pt-md { padding-top: var(--spacing-md); }
         .border-t { border-top: 1px solid var(--color-border); }
         .p-xs { padding: 0.25rem; }

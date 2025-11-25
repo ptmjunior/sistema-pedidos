@@ -104,21 +104,21 @@ const Users = ({ onNavigate }) => {
                                     required
                                 />
                             </div>
-                            {!editingId && (
-                                <div className="form-group">
-                                    <label className="label">Senha</label>
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        className="input"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                        minLength={6}
-                                        placeholder="Mínimo 6 caracteres"
-                                    />
-                                </div>
-                            )}
+                            <div className="form-group">
+                                <label className="label">
+                                    Senha{editingId && ' (opcional - deixe em branco para manter a atual)'}
+                                </label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    className="input"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required={!editingId}
+                                    minLength={6}
+                                    placeholder={editingId ? 'Nova senha (opcional)' : 'Mínimo 6 caracteres'}
+                                />
+                            </div>
                             <div className="form-group">
                                 <label className="label">{t.users.role}</label>
                                 <select
