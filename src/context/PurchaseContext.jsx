@@ -305,6 +305,31 @@ export const PurchaseProvider = ({ children }) => {
                 await supabase
                     .from('notifications')
                     .insert(submissionNotifications);
+
+                // Send email notification to approvers
+                try {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'submission',
+                            request: {
+                                id: request.id,
+                                desc: newRequest.desc,
+                                amount: totalAmount,
+                                department: currentUser.department,
+                                items: newRequest.items
+                            },
+                            requesterName: currentUser.name,
+                            recipients: approvers.map(a => a.email),
+                            cc: [currentUser.email]
+                        })
+                    });
+                    console.log('Email notification sent to approvers');
+                } catch (emailError) {
+                    console.error('Error sending email:', emailError);
+                    // Don't throw - email failure shouldn't break the request creation
+                }
             }
 
             // Reload requests
@@ -399,6 +424,28 @@ export const PurchaseProvider = ({ children }) => {
                     await supabase
                         .from('notifications')
                         .insert(approvalNotifications);
+
+                    // Send email notification
+                    try {
+                        await fetch('/api/send-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'approval',
+                                request: {
+                                    id: request.id,
+                                    desc: request.desc,
+                                    amount: request.amount
+                                },
+                                requesterName: requester?.name || 'Usuário',
+                                approverName: currentUser.name,
+                                recipients: recipients.map(r => r.email)
+                            })
+                        });
+                        console.log('Approval email sent');
+                    } catch (emailError) {
+                        console.error('Error sending approval email:', emailError);
+                    }
                 }
             } else if (status === 'rejected') {
                 const requester = users.find(u => u.id === request.userId);
@@ -412,6 +459,28 @@ export const PurchaseProvider = ({ children }) => {
                             message: `<p>O pedido <strong>${request.desc}</strong> foi rejeitado por ${currentUser.name}.</p>`,
                             request_id: id
                         }]);
+
+                    // Send email notification
+                    try {
+                        await fetch('/api/send-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'rejection',
+                                request: {
+                                    id: request.id,
+                                    desc: request.desc,
+                                    amount: request.amount
+                                },
+                                requesterName: requester.name,
+                                approverName: currentUser.name,
+                                recipients: [requester.email]
+                            })
+                        });
+                        console.log('Rejection email sent');
+                    } catch (emailError) {
+                        console.error('Error sending rejection email:', emailError);
+                    }
                 }
             }
 
