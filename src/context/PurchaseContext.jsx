@@ -50,6 +50,12 @@ export const PurchaseProvider = ({ children }) => {
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            // Mark password recovery in localStorage
+            if (event === 'PASSWORD_RECOVERY') {
+                localStorage.setItem('password_recovery_active', 'true');
+                setIsLoading(false);
+                return;
+            }
             // Check if this is a password recovery flow
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const type = hashParams.get('type');

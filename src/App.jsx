@@ -42,8 +42,9 @@ function App() {
     // Check if this is a password recovery flow
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
+    const isRecoveryMode = localStorage.getItem('password_recovery_active') === 'true';
 
-    if (type === 'recovery') {
+    if (type === 'recovery' || isRecoveryMode) {
       return <ResetPassword onNavigate={navigateTo} />;
     }
     if (view === 'forgot-password') {

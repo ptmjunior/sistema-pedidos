@@ -57,6 +57,9 @@ const ResetPassword = ({ onNavigate }) => {
                 text: t.resetPassword.successMessage
             });
 
+            // Clear recovery mode flag
+            localStorage.removeItem('password_recovery_active');
+
             // Sign out the user and redirect to login after 2 seconds
             setTimeout(async () => {
                 await supabase.auth.signOut();
