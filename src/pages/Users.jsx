@@ -19,12 +19,35 @@ const Users = ({ onNavigate }) => {
 
     // Only Approvers (Admins) can manage users
     if (currentUser.role !== 'approver') {
+        // Auto-redirect to dashboard after 3 seconds
+        React.useEffect(() => {
+            const timer = setTimeout(() => {
+                onNavigate('dashboard');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }, [onNavigate]);
+
         return (
             <Layout onNavigate={onNavigate} currentPath="users">
                 <div className="card p-xl text-center">
-                    <h2 className="text-xl font-bold text-red-600 mb-sm">Access Denied</h2>
-                    <p className="text-muted">You do not have permission to view this page.</p>
+                    <div className="access-denied-icon mb-md">🚫</div>
+                    <h2 className="text-xl font-bold text-red-600 mb-sm">Acesso Negado</h2>
+                    <p className="text-muted mb-md">Você não tem permissão para visualizar esta página.</p>
+                    <p className="text-sm text-muted mb-lg">Apenas administradores podem gerenciar usuários.</p>
+                    <button
+                        onClick={() => onNavigate('dashboard')}
+                        className="btn btn-primary"
+                    >
+                        Ir para o Dashboard
+                    </button>
+                    <p className="text-xs text-muted mt-md">Redirecionando automaticamente em 3 segundos...</p>
                 </div>
+                <style>{`
+                    .access-denied-icon {
+                        font-size: 4rem;
+                        opacity: 0.5;
+                    }
+                `}</style>
             </Layout>
         );
     }

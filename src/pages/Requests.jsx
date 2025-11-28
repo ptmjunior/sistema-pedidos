@@ -18,8 +18,12 @@ const Requests = ({ onNavigate }) => {
         // Requester sees ONLY their own requests
         visibleRequests = requests.filter(r => r.userId === currentUser.id);
     } else if (currentUser.role === 'buyer') {
-        // Buyer sees approved and purchased requests
-        visibleRequests = requests.filter(r => r.status === 'approved' || r.status === 'purchased');
+        // Buyer sees approved and purchased requests + their own requests (any status)
+        visibleRequests = requests.filter(r =>
+            r.status === 'approved' ||
+            r.status === 'purchased' ||
+            r.userId === currentUser.id
+        );
     }
     // Approver sees ALL requests (no initial filter)
 
