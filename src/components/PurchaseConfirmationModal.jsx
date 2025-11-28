@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const PurchaseConfirmationModal = ({ request, onClose, onConfirm, isProcessing }) => {
     const [dates, setDates] = useState({});
+    const [comment, setComment] = useState('');
 
     const handleDateChange = (itemId, date) => {
         setDates(prev => ({
@@ -20,7 +21,7 @@ const PurchaseConfirmationModal = ({ request, onClose, onConfirm, isProcessing }
             return;
         }
 
-        onConfirm(dates);
+        onConfirm(dates, comment);
     };
 
     return (
@@ -72,6 +73,17 @@ const PurchaseConfirmationModal = ({ request, onClose, onConfirm, isProcessing }
                                 ))}
                             </tbody>
                         </table>
+
+                        <div className="mt-lg pt-md border-t">
+                            <label className="label text-sm font-medium mb-xs block">Comentário da Compra (Opcional)</label>
+                            <textarea
+                                className="input w-full p-sm border rounded"
+                                rows="2"
+                                placeholder="Adicione observações sobre a compra (ex: número do pedido no fornecedor, detalhes de entrega...)"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            ></textarea>
+                        </div>
                     </div>
 
                     <div className="modal-footer">
@@ -213,8 +225,8 @@ const PurchaseConfirmationModal = ({ request, onClose, onConfirm, isProcessing }
                         }
                     }
                 `}</style>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

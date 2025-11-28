@@ -3,12 +3,16 @@ import Layout from '../components/Layout';
 import { usePurchase } from '../context/PurchaseContext';
 import { translations as t } from '../utils/translations';
 import { generatePOId } from '../utils/formatters';
+
 import PurchaseConfirmationModal from '../components/PurchaseConfirmationModal';
+import ViewRequestModal from '../components/ViewRequestModal';
 
 const Requests = ({ onNavigate }) => {
     const { requests, currentUser, updateStatus } = usePurchase();
     const [filter, setFilter] = useState('all');
+
     const [purchasingRequest, setPurchasingRequest] = useState(null);
+    const [viewingRequest, setViewingRequest] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
     // Role-based filtering logic
@@ -37,10 +41,10 @@ const Requests = ({ onNavigate }) => {
         ? visibleRequests
         : visibleRequests.filter(r => r.status === filter);
 
-    const handlePurchaseConfirm = async (dates) => {
+    const handlePurchaseConfirm = async (dates, comment) => {
         setIsProcessing(true);
         try {
-            await updateStatus(purchasingRequest.id, 'purchased', dates);
+            await updateStatus(purchasingRequest.id, 'purchased', dates, comment);
             setPurchasingRequest(null);
         } catch (error) {
             console.error('Error marking as purchased:', error);
@@ -117,25 +121,28 @@ const Requests = ({ onNavigate }) => {
                                         {/* Buyer can mark approved as purchased */}
                                         {currentUser.role === 'buyer' && req.status === 'approved' && (
                                             <button
-                                                onClick={() => setPurchasingRequest(req)}
-                                                className="btn-text text-success"
+                                                onClick={(e) => { e.stopPropagation(); setPurchasingRequest(req); }}
+                                                className="btn-text text-success mr-sm"
                                             >
                                                 ✓ Marcar como Comprado
                                             </button>
                                         )}
 
-                                        {/* Only allow editing if it's the user's own request and (open or pending), or if user is approver */}
-                                        {(currentUser.id === req.userId && (req.status === 'open' || req.status === 'pending')) || currentUser.role === 'approver' ? (
+                                        {/* Edit only allowed for requester if status is pending, or for approver */}
+                                        {(currentUser.id === req.userId && req.status === 'pending') || currentUser.role === 'approver' ? (
                                             <button
-                                                onClick={() => onNavigate('edit-order', { id: req.id })}
+                                                onClick={(e) => { e.stopPropagation(); onNavigate('edit-order', { id: req.id }); }}
                                                 className="btn-text text-primary"
                                             >
                                                 {t.requests.edit}
                                             </button>
-                                        ) : req.status === 'purchased' ? (
-                                            <span className="text-xs text-success">✓ Comprado</span>
                                         ) : (
-                                            <span className="text-xs text-muted">{t.requests.viewOnly}</span>
+                                            <button
+                                                onClick={() => setViewingRequest(req)}
+                                                className="btn-text text-primary"
+                                            >
+                                                Ver Detalhes
+                                            </button>
                                         )}
                                     </td>
                                 </tr>
@@ -151,6 +158,13 @@ const Requests = ({ onNavigate }) => {
                     onClose={() => setPurchasingRequest(null)}
                     onConfirm={handlePurchaseConfirm}
                     isProcessing={isProcessing}
+                />
+            )}
+
+            {viewingRequest && (
+                <ViewRequestModal
+                    request={viewingRequest}
+                    onClose={() => setViewingRequest(null)}
                 />
             )}
 

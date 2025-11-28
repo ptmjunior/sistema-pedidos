@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import ApprovalModal from '../components/ApprovalModal';
+import RequestHistory from '../components/RequestHistory';
 import { usePurchase } from '../context/PurchaseContext';
 import { generatePOId } from '../utils/formatters';
 import { translations as t } from '../utils/translations';
@@ -173,6 +174,11 @@ const Approvals = ({ onNavigate }) => {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Request History */}
+                        {selectedRequest.comments && selectedRequest.comments.length > 0 && (
+                            <RequestHistory comments={selectedRequest.comments} />
+                        )}
                     </div>
                 ) : (
                     // Grid View
@@ -365,7 +371,7 @@ const Approvals = ({ onNavigate }) => {
                   to { transform: rotate(360deg); }
                 }
               `}</style>
-        </Layout>
+        </Layout >
     );
 };
 

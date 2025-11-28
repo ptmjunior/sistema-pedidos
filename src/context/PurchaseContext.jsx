@@ -150,7 +150,16 @@ export const PurchaseProvider = ({ children }) => {
                 .select(`
                     *,
                     user:users(name, email, department),
-                    items:request_items(*)
+                    items:request_items(*),
+                    comments:request_comments(
+                        id,
+                        comment_type,
+                        old_status,
+                        new_status,
+                        comment,
+                        created_at,
+                        user:users(name, email)
+                    )
                 `)
                 .order('created_at', { ascending: false });
 
@@ -179,7 +188,17 @@ export const PurchaseProvider = ({ children }) => {
                     total: parseFloat(item.total),
                     vendor: item.vendor_id,
                     link: item.product_link || ''
-                })) || []
+                })) || [],
+                comments: req.comments?.map(comment => ({
+                    id: comment.id,
+                    type: comment.comment_type,
+                    oldStatus: comment.old_status,
+                    newStatus: comment.new_status,
+                    comment: comment.comment,
+                    createdAt: comment.created_at,
+                    userName: comment.user?.name || 'Unknown',
+                    userEmail: comment.user?.email
+                })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || []
             })) || [];
 
             setRequests(transformedRequests);
@@ -395,19 +414,37 @@ export const PurchaseProvider = ({ children }) => {
                 if (itemsError) throw itemsError;
             }
 
+            // Create comment if request was edited from pending status
+            if (currentRequest && currentRequest.status === 'pending' && updateData.status === 'open') {
+                await supabase
+                    .from('request_comments')
+                    .insert([{
+                        request_id: id,
+                        user_id: currentUser.id,
+                        comment_type: 'edit',
+                        old_status: 'pending',
+                        new_status: 'open',
+                        comment: updatedData.editComment || 'Pedido editado pelo solicitante'
+                    }]);
+            }
+
             // Reload data
             await loadRequests();
             if (currentUser) {
                 await loadNotifications(currentUser.id);
             }
         } catch (error) {
-            console.error('Error updating status:', error);
+            console.error('Error updating request:', error);
             throw error;
         }
     };
 
-    const updateStatus = async (id, status, dates = null) => {
+    const updateStatus = async (id, status, dates = null, comments = '') => {
         try {
+            // Get current request to track old status
+            const request = requests.find(r => r.id === id);
+            const oldStatus = request?.status;
+
             // Update request status
             const { error: statusError } = await supabase
                 .from('purchase_requests')
@@ -416,29 +453,49 @@ export const PurchaseProvider = ({ children }) => {
 
             if (statusError) throw statusError;
 
+            // Create comment for status change
+            if (oldStatus && oldStatus !== status) {
+                await supabase
+                    .from('request_comments')
+                    .insert([{
+                        request_id: id,
+                        user_id: currentUser.id,
+                        comment_type: 'status_change',
+                        old_status: oldStatus,
+                        new_status: status,
+                        comment: comments || null
+                    }]);
+            }
+
             // Handle 'purchased' status with delivery dates
             if (status === 'purchased' && dates) {
-                // Update delivery dates for items
                 const updatePromises = Object.entries(dates).map(([itemId, date]) =>
                     supabase
                         .from('request_items')
                         .update({ estimated_delivery_date: date })
                         .eq('id', itemId)
                 );
-
                 await Promise.all(updatePromises);
             }
 
-            // Get request details for notifications
-            const request = requests.find(r => r.id === id);
+            // Create notifications based on status
             if (request) {
-                // Create notifications based on status
                 if (status === 'approved') {
                     await createApprovalNotifications(request, currentUser, users, supabase);
                 } else if (status === 'rejected') {
                     await createRejectionNotifications(request, currentUser, users, supabase);
+                } else if (status === 'pending') {
+                    // Notification when more info is requested
+                    await supabase
+                        .from('notifications')
+                        .insert([{
+                            recipient_id: request.userId,
+                            type: 'more_info_requested',
+                            subject: `Mais informações solicitadas`,
+                            message: `<p>O aprovador solicitou mais informações sobre seu pedido:</p><p><em>${comments}</em></p>`,
+                            request_id: request.id
+                        }]);
                 } else if (status === 'purchased') {
-                    // Create notification for requester
                     await supabase
                         .from('notifications')
                         .insert([{
@@ -448,34 +505,6 @@ export const PurchaseProvider = ({ children }) => {
                             message: `<p>Seu pedido <strong>${request.desc}</strong> foi comprado.</p>`,
                             request_id: request.id
                         }]);
-
-                    // Send email
-                    try {
-                        // Get requester email
-                        const requester = users.find(u => u.id === request.userId);
-                        if (requester && requester.email) {
-                            await fetch('/api/send-email', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    type: 'purchased',
-                                    request: {
-                                        ...request,
-                                        items: request.items.map(item => ({
-                                            ...item,
-                                            deliveryDate: dates ? dates[item.id] : null
-                                        }))
-                                    },
-                                    requesterName: request.user,
-                                    recipients: [requester.email],
-                                    cc: []
-                                })
-                            });
-                            console.log('Purchased email sent');
-                        }
-                    } catch (emailError) {
-                        console.error('Error sending purchased email:', emailError);
-                    }
                 }
             }
 

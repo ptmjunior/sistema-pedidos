@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { usePurchase } from '../context/PurchaseContext';
+import RequestHistory from '../components/RequestHistory';
 import { translations as t } from '../utils/translations';
 
 const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
@@ -11,7 +12,8 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
         desc: '',
         priority: 'medium',
         deliveryDate: '',
-        notes: ''
+        notes: '',
+        editComment: ''
     });
 
     // Items state
@@ -96,13 +98,20 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
             return;
         }
 
+        // Validate edit comment if editing
+        if (initialData && !formData.editComment.trim()) {
+            alert('Por favor, informe um comentário explicando a alteração.');
+            return;
+        }
+
         const requestData = {
             desc: formData.desc,
             priority: formData.priority,
             deliveryDate: formData.deliveryDate,
             notes: formData.notes,
             items: items,
-            amount: calculateTotal()
+            amount: calculateTotal(),
+            editComment: formData.editComment
         };
 
         if (initialData) {
@@ -139,6 +148,13 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
                         {t.createOrder.cancel}
                     </button>
                 </div>
+
+                {/* Request History - Only show in edit mode */}
+                {initialData && initialData.comments && initialData.comments.length > 0 && (
+                    <div className="mb-lg">
+                        <RequestHistory comments={initialData.comments} />
+                    </div>
+                )}
 
                 <div className="card mb-lg">
                     <h2 className="text-lg font-bold mb-md">{t.createOrder.basicInfo}</h2>
@@ -330,16 +346,25 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
                     )}
                 </div>
 
-                <div className="card mb-xl">
+                {/* Unified Comment Field */}
+                <div className={`card mb-xl ${initialData ? 'border-orange-200 bg-orange-50' : ''}`}>
                     <div className="form-group">
-                        <label className="label">{t.createOrder.notes}</label>
+                        <label className={`label ${initialData ? 'text-orange-800 font-bold' : ''}`}>
+                            {initialData ? 'Comentário (Obrigatório)' : 'Comentário (Opcional)'}
+                        </label>
+                        {initialData && (
+                            <p className="text-xs text-orange-700 mb-sm">
+                                Adicione um comentário explicando suas alterações para o aprovador.
+                            </p>
+                        )}
                         <textarea
-                            name="notes"
-                            className="input textarea"
+                            name={initialData ? "editComment" : "notes"}
+                            className={`input textarea ${initialData ? 'border-orange-300' : ''}`}
                             rows="3"
-                            placeholder={t.createOrder.notesPlaceholder}
-                            value={formData.notes}
+                            placeholder={initialData ? "Ex: Ajustei a quantidade conforme solicitado..." : t.createOrder.notesPlaceholder}
+                            value={initialData ? formData.editComment : formData.notes}
                             onChange={handleChange}
+                            required={!!initialData}
                         ></textarea>
                     </div>
                 </div>
