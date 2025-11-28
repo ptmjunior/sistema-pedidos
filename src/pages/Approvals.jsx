@@ -11,7 +11,7 @@ const Approvals = ({ onNavigate }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [modalAction, setModalAction] = useState(null);
 
-    const pendingRequests = requests.filter(req => req.status === 'pending');
+    const pendingRequests = requests.filter(req => req.status === 'open');
 
     const handleActionClick = (action) => {
         setModalAction(action);
@@ -61,6 +61,13 @@ const Approvals = ({ onNavigate }) => {
                                             disabled={isProcessing}
                                         >
                                             {t.approvals.rejectRequest}
+                                        </button>
+                                        <button
+                                            onClick={() => handleActionClick('pending')}
+                                            className="btn btn-secondary text-orange-600 border-orange-200 hover:bg-orange-50"
+                                            disabled={isProcessing}
+                                        >
+                                            {t.approvals.requestMoreInfo}
                                         </button>
                                         <button
                                             onClick={() => handleActionClick('approved')}
@@ -264,6 +271,9 @@ const Approvals = ({ onNavigate }) => {
                 .text-red-600 { color: #dc2626; }
                 .border-red-200 { border-color: #fecaca; }
                 .hover\\:bg-red-50:hover { background-color: #fef2f2; }
+                .text-orange-600 { color: #ea580c; }
+                .border-orange-200 { border-color: #fed7aa; }
+                .hover\\:bg-orange-50:hover { background-color: #fff7ed; }
                 .hover\\:text-primary:hover { color: var(--color-primary); }
                 .hover\\:underline:hover { text-decoration: underline; }
                 .bg-slate-50 { background-color: #f8fafc; }

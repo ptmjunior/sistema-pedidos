@@ -55,14 +55,15 @@ export const translations = {
 
     // Approvals
     approvals: {
-        title: 'Aprovações Pendentes',
+        title: 'Pedidos Abertos',
         subtitle: 'Revise e aprove pedidos de compra.',
-        noPending: 'Nenhuma aprovação pendente.',
+        noPending: 'Nenhum pedido aberto.',
         analyze: 'Analisar',
         backToList: '← Voltar para Lista',
         analyzeRequest: 'Analisar Pedido',
         rejectRequest: 'Rejeitar Pedido',
         approveRequest: 'Aprovar Pedido',
+        requestMoreInfo: 'Pedir Mais Informações',
         requestDetails: 'Detalhes do Pedido',
         requestId: 'ID do Pedido',
         requester: 'Solicitante',
@@ -80,7 +81,8 @@ export const translations = {
         qty: 'Qtd',
         price: 'Preço',
         total: 'Total',
-        view: 'Ver'
+        view: 'Ver',
+        moreInfoPlaceholder: 'Descreva quais informações ou alterações são necessárias...'
     },
 
     // Create Order
@@ -190,7 +192,8 @@ export const translations = {
 
     // Status
     status: {
-        pending: 'Pendente',
+        open: 'Aberto',
+        pending: 'Aguardando Alterações',
         approved: 'Aprovado',
         purchased: 'Comprado',
         rejected: 'Rejeitado'

@@ -3,10 +3,35 @@ import React, { useState } from 'react';
 const ApprovalModal = ({ request, action, onClose, onConfirm, isProcessing }) => {
     const [comments, setComments] = useState('');
     const isApproval = action === 'approved';
+    const isPending = action === 'pending';
 
     const handleSubmit = (e) => {
         e.preventDefault();
         onConfirm(comments);
+    };
+
+    const getTitle = () => {
+        if (isApproval) return '✓ Aprovar Pedido';
+        if (isPending) return '📝 Pedir Mais Informações';
+        return '✕ Rejeitar Pedido';
+    };
+
+    const getSubtitle = () => {
+        if (isApproval) return 'Adicione comentários ou observações sobre a aprovação (opcional)';
+        if (isPending) return 'Descreva quais informações ou alterações são necessárias';
+        return 'Informe o motivo da rejeição para o solicitante';
+    };
+
+    const getButtonClass = () => {
+        if (isApproval) return 'btn-success';
+        if (isPending) return 'btn-warning';
+        return 'btn-danger';
+    };
+
+    const getButtonText = () => {
+        if (isApproval) return '✓ Confirmar Aprovação';
+        if (isPending) return '📝 Enviar Solicitação';
+        return '✕ Confirmar Rejeição';
     };
 
     return (
@@ -15,13 +40,10 @@ const ApprovalModal = ({ request, action, onClose, onConfirm, isProcessing }) =>
                 <div className="modal-header">
                     <div>
                         <h2 className="text-xl font-bold">
-                            {isApproval ? '✓ Aprovar Pedido' : '✕ Rejeitar Pedido'}
+                            {getTitle()}
                         </h2>
                         <p className="text-sm text-muted mt-xs">
-                            {isApproval
-                                ? 'Adicione comentários ou observações sobre a aprovação (opcional)'
-                                : 'Informe o motivo da rejeição para o solicitante'
-                            }
+                            {getSubtitle()}
                         </p>
                     </div>
                     <button
@@ -55,7 +77,7 @@ const ApprovalModal = ({ request, action, onClose, onConfirm, isProcessing }) =>
 
                         <div className="form-group mt-md">
                             <label className="label">
-                                {isApproval ? 'Comentários' : 'Motivo da Rejeição'}
+                                {isApproval ? 'Comentários' : isPending ? 'Informações Necessárias' : 'Motivo da Rejeição'}
                                 {!isApproval && <span className="text-red-600"> *</span>}
                             </label>
                             <textarea
@@ -63,17 +85,19 @@ const ApprovalModal = ({ request, action, onClose, onConfirm, isProcessing }) =>
                                 rows="4"
                                 value={comments}
                                 onChange={(e) => setComments(e.target.value)}
-                                placeholder={isApproval
-                                    ? 'Ex: Aprovado conforme orçamento disponível...'
-                                    : 'Ex: Valor acima do orçamento aprovado para o departamento...'
+                                placeholder={
+                                    isApproval
+                                        ? 'Ex: Aprovado conforme orçamento disponível...'
+                                        : isPending
+                                            ? 'Ex: Por favor, adicione mais detalhes sobre a especificação técnica...'
+                                            : 'Ex: Valor acima do orçamento aprovado para o departamento...'
                                 }
                                 required={!isApproval}
                             />
                             <p className="text-xs text-muted mt-xs">
                                 {isApproval
                                     ? 'Estes comentários serão incluídos no e-mail de notificação'
-                                    : 'O solicitante receberá este motivo por e-mail'
-                                }
+                                    : 'O solicitante receberá esta mensagem por e-mail e poderá editar o pedido'}
                             </p>
                         </div>
                     </div>
@@ -89,7 +113,7 @@ const ApprovalModal = ({ request, action, onClose, onConfirm, isProcessing }) =>
                         </button>
                         <button
                             type="submit"
-                            className={`btn ${isApproval ? 'btn-success' : 'btn-danger'}`}
+                            className={`btn ${getButtonClass()}`}
                             disabled={isProcessing}
                         >
                             {isProcessing ? (
@@ -98,9 +122,7 @@ const ApprovalModal = ({ request, action, onClose, onConfirm, isProcessing }) =>
                                     Processando...
                                 </>
                             ) : (
-                                <>
-                                    {isApproval ? '✓ Confirmar Aprovação' : '✕ Confirmar Rejeição'}
-                                </>
+                                getButtonText()
                             )}
                         </button>
                     </div>
@@ -200,6 +222,18 @@ const ApprovalModal = ({ request, action, onClose, onConfirm, isProcessing }) =>
                         background-color: #15803d;
                     }
 
+                    .btn-warning {
+                        background-color: #ea580c;
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        gap: var(--spacing-xs);
+                    }
+
+                    .btn-warning:hover:not(:disabled) {
+                        background-color: #c2410c;
+                    }
+
                     .btn-danger {
                         background-color: #dc2626;
                         color: white;
@@ -213,6 +247,7 @@ const ApprovalModal = ({ request, action, onClose, onConfirm, isProcessing }) =>
                     }
 
                     .btn-success:disabled,
+                    .btn-warning:disabled,
                     .btn-danger:disabled {
                         opacity: 0.6;
                         cursor: not-allowed;

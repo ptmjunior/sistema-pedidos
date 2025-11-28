@@ -19,13 +19,18 @@ const Requests = ({ onNavigate }) => {
         visibleRequests = requests.filter(r => r.userId === currentUser.id);
     } else if (currentUser.role === 'buyer') {
         // Buyer sees approved and purchased requests + their own requests (any status)
+        // BUT NOT pending requests from others (pending = awaiting changes from requester)
         visibleRequests = requests.filter(r =>
             r.status === 'approved' ||
             r.status === 'purchased' ||
+            r.status === 'open' ||
             r.userId === currentUser.id
         );
+    } else if (currentUser.role === 'approver') {
+        // Approver sees ALL requests including pending ones
+        visibleRequests = requests;
     }
-    // Approver sees ALL requests (no initial filter)
+    // If no specific role, show all (fallback)
 
     // Apply status filter (dropdown)
     const filteredRequests = filter === 'all'
@@ -58,6 +63,7 @@ const Requests = ({ onNavigate }) => {
                         onChange={(e) => setFilter(e.target.value)}
                     >
                         <option value="all">{t.requests.allStatus}</option>
+                        <option value="open">{t.status.open}</option>
                         <option value="pending">{t.status.pending}</option>
                         <option value="approved">{t.status.approved}</option>
                         <option value="purchased">{t.status.purchased || 'Comprado'}</option>
@@ -118,8 +124,8 @@ const Requests = ({ onNavigate }) => {
                                             </button>
                                         )}
 
-                                        {/* Only allow editing if it's the user's own request and pending, or if user is approver */}
-                                        {(currentUser.id === req.userId && req.status === 'pending') || currentUser.role === 'approver' ? (
+                                        {/* Only allow editing if it's the user's own request and (open or pending), or if user is approver */}
+                                        {(currentUser.id === req.userId && (req.status === 'open' || req.status === 'pending')) || currentUser.role === 'approver' ? (
                                             <button
                                                 onClick={() => onNavigate('edit-order', { id: req.id })}
                                                 className="btn-text text-primary"
@@ -155,9 +161,10 @@ const Requests = ({ onNavigate }) => {
                   font-size: 0.75rem;
                   font-weight: 600;
                 }
+                .status-open { background-color: #dbeafe; color: #1e40af; }
                 .status-pending { background-color: #fff7ed; color: #c2410c; }
                 .status-approved { background-color: #dcfce7; color: #15803d; }
-                .status-purchased { background-color: #dbeafe; color: #1e40af; }
+                .status-purchased { background-color: #e0e7ff; color: #4338ca; }
                 .status-rejected { background-color: #fee2e2; color: #b91c1c; }
                 .btn-text { background: none; border: none; padding: 0; font-weight: 500; cursor: pointer; }
                 .text-primary { color: var(--color-primary); }

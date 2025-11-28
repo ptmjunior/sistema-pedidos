@@ -236,7 +236,7 @@ export const PurchaseProvider = ({ children }) => {
 
     useEffect(() => {
         if (requests.length > 0) {
-            const pending = requests.filter(r => r.status === 'pending').length;
+            const pending = requests.filter(r => r.status === 'open').length;
             const approved = requests.filter(r => r.status === 'approved').length;
             const totalSpend = requests
                 .filter(r => r.status === 'approved')
@@ -265,7 +265,7 @@ export const PurchaseProvider = ({ children }) => {
                     description: newRequest.desc,
                     amount: totalAmount,
                     department: currentUser.department,
-                    status: 'pending'
+                    status: 'open'
                 }])
                 .select()
                 .single();
@@ -351,13 +351,22 @@ export const PurchaseProvider = ({ children }) => {
                 totalAmount = updatedData.items.reduce((sum, item) => sum + item.total, 0);
             }
 
+            // Get current request to check status
+            const currentRequest = requests.find(r => r.id === id);
+            const updateData = {
+                description: updatedData.desc,
+                amount: totalAmount
+            };
+
+            // If request is 'pending' (awaiting changes), change to 'open' when edited
+            if (currentRequest && currentRequest.status === 'pending') {
+                updateData.status = 'open';
+            }
+
             // Update purchase request
             const { error: requestError } = await supabase
                 .from('purchase_requests')
-                .update({
-                    description: updatedData.desc,
-                    amount: totalAmount
-                })
+                .update(updateData)
                 .eq('id', id);
 
             if (requestError) throw requestError;

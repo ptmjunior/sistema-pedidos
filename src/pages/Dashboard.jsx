@@ -17,7 +17,7 @@ const Dashboard = ({ onNewRequest, onNavigate, currentPath }) => {
 
     // Recalculate stats based on visibility
     const dashboardStats = {
-        pending: visibleRequests.filter(r => r.status === 'pending').length,
+        pending: visibleRequests.filter(r => r.status === 'open').length,
         approved: visibleRequests.filter(r => r.status === 'approved').length,
         totalSpend: visibleRequests
             .filter(r => r.status === 'approved')
@@ -120,9 +120,10 @@ const Dashboard = ({ onNewRequest, onNavigate, currentPath }) => {
                   text-transform: capitalize;
                 }
                 
+                .status-open { background-color: #dbeafe; color: #1e40af; }
                 .status-pending { background-color: #fff7ed; color: #c2410c; }
                 .status-approved { background-color: #dcfce7; color: #15803d; }
-                .status-purchased { background-color: #dbeafe; color: #1e40af; }
+                .status-purchased { background-color: #e0e7ff; color: #4338ca; }
                 .status-rejected { background-color: #fee2e2; color: #b91c1c; }
               `}</style>
         </Layout>
