@@ -7,13 +7,23 @@ import { generatePOId } from '../utils/formatters';
 import PurchaseConfirmationModal from '../components/PurchaseConfirmationModal';
 import ViewRequestModal from '../components/ViewRequestModal';
 
-const Requests = ({ onNavigate }) => {
+const Requests = ({ onNavigate, initialViewingRequestId }) => {
     const { requests, currentUser, updateStatus } = usePurchase();
     const [filter, setFilter] = useState('all');
 
     const [purchasingRequest, setPurchasingRequest] = useState(null);
     const [viewingRequest, setViewingRequest] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    // Effect to handle deep linking from notifications
+    React.useEffect(() => {
+        if (initialViewingRequestId && requests.length > 0) {
+            const req = requests.find(r => r.id === initialViewingRequestId);
+            if (req) {
+                setViewingRequest(req);
+            }
+        }
+    }, [initialViewingRequestId, requests]);
 
     // Role-based filtering logic
     let visibleRequests = requests;

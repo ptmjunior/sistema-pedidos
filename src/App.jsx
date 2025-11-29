@@ -23,6 +23,7 @@ function AppWrapper() {
 function App() {
   const [view, setView] = useState('dashboard');
   const [editingRequestId, setEditingRequestId] = useState(null);
+  const [viewingRequestId, setViewingRequestId] = useState(null);
   const { requests, isAuthenticated } = usePurchase();
 
   const navigateTo = (page, params = {}) => {
@@ -31,6 +32,13 @@ function App() {
     } else {
       setEditingRequestId(null);
     }
+
+    if (page === 'requests' && params.viewRequestId) {
+      setViewingRequestId(params.viewRequestId);
+    } else {
+      setViewingRequestId(null);
+    }
+
     setView(page);
   };
 
@@ -69,6 +77,7 @@ function App() {
       {view === 'requests' && (
         <Requests
           onNavigate={navigateTo}
+          initialViewingRequestId={viewingRequestId}
         />
       )}
       {view === 'vendors' && (

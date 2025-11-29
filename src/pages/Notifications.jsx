@@ -22,7 +22,7 @@ const Notifications = ({ onNavigate }) => {
         }
         // Navigate to the related request if available
         if (notification.requestId) {
-            onNavigate('requests');
+            onNavigate('requests', { viewRequestId: notification.requestId });
         }
     };
 
@@ -92,7 +92,10 @@ const Notifications = ({ onNavigate }) => {
                                                 <span className="unread-badge">{t.notifications.new}</span>
                                             )}
                                         </div>
-                                        <p className="text-sm mb-sm">{notification.message}</p>
+                                        <div
+                                            className="text-sm mb-sm"
+                                            dangerouslySetInnerHTML={{ __html: notification.message }}
+                                        />
                                         <div className="flex items-center gap-md text-xs text-muted">
                                             <span>📧 {notification.recipientEmail}</span>
                                             <span>•</span>
