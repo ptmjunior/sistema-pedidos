@@ -84,6 +84,9 @@ const ViewRequestModal = ({ request, onClose }) => {
                                     <th className="p-md text-sm text-muted font-medium">{t.dashboard.description}</th>
                                     <th className="p-md text-sm text-muted font-medium">{t.approvals.category}</th>
                                     <th className="p-md text-sm text-muted font-medium">{t.approvals.vendor}</th>
+                                    {request.status === 'purchased' && (
+                                        <th className="p-md text-sm text-muted font-medium">Previsão de Entrega</th>
+                                    )}
                                     <th className="p-md text-sm text-muted font-medium text-right">{t.approvals.qty}</th>
                                     <th className="p-md text-sm text-muted font-medium text-right">{t.approvals.price}</th>
                                     <th className="p-md text-sm text-muted font-medium text-right">{t.approvals.total}</th>
@@ -95,6 +98,11 @@ const ViewRequestModal = ({ request, onClose }) => {
                                         <td className="p-md font-medium">{item.desc}</td>
                                         <td className="p-md text-sm capitalize">{item.category}</td>
                                         <td className="p-md text-sm">{item.vendor || '-'}</td>
+                                        {request.status === 'purchased' && (
+                                            <td className="p-md text-sm">
+                                                {item.deliveryDate ? new Date(item.deliveryDate).toLocaleDateString('pt-BR') : '-'}
+                                            </td>
+                                        )}
                                         <td className="p-md text-right">{item.qty}</td>
                                         <td className="p-md text-right">R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                         <td className="p-md text-right font-bold">R$ {item.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>

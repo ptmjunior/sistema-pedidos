@@ -187,7 +187,8 @@ export const PurchaseProvider = ({ children }) => {
                     price: parseFloat(item.unit_price),
                     total: parseFloat(item.total),
                     vendor: item.vendor_id,
-                    link: item.product_link || ''
+                    link: item.product_link || '',
+                    deliveryDate: item.estimated_delivery_date
                 })) || [],
                 comments: req.comments?.map(comment => ({
                     id: comment.id,
