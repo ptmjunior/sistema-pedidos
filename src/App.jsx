@@ -5,6 +5,7 @@ import Requests from './pages/Requests';
 import Vendors from './pages/Vendors';
 import Users from './pages/Users';
 import Approvals from './pages/Approvals';
+import Reports from './pages/Reports';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
@@ -92,6 +93,11 @@ function App() {
       )}
       {view === 'approvals' && (
         <Approvals
+          onNavigate={navigateTo}
+        />
+      )}
+      {view === 'reports' && (
+        <Reports
           onNavigate={navigateTo}
         />
       )}
