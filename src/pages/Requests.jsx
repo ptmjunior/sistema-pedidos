@@ -10,6 +10,8 @@ import ViewRequestModal from '../components/ViewRequestModal';
 const Requests = ({ onNavigate, initialViewingRequestId }) => {
     const { requests, currentUser, updateStatus } = usePurchase();
     const [filter, setFilter] = useState('all');
+    const [searchId, setSearchId] = useState('');
+    const [searchRequester, setSearchRequester] = useState('');
 
     const [purchasingRequest, setPurchasingRequest] = useState(null);
     const [viewingRequest, setViewingRequest] = useState(null);
@@ -47,9 +49,13 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
     // If no specific role, show all (fallback)
 
     // Apply status filter (dropdown)
-    const filteredRequests = filter === 'all'
-        ? visibleRequests
-        : visibleRequests.filter(r => r.status === filter);
+    // Apply status filter (dropdown) and search filters
+    const filteredRequests = visibleRequests.filter(r => {
+        const matchesStatus = filter === 'all' || r.status === filter;
+        const matchesId = searchId === '' || generatePOId(r.createdAt).toLowerCase().includes(searchId.toLowerCase());
+        const matchesRequester = searchRequester === '' || r.user.toLowerCase().includes(searchRequester.toLowerCase());
+        return matchesStatus && matchesId && matchesRequester;
+    });
 
     const handlePurchaseConfirm = async (dates, comment) => {
         setIsProcessing(true);
@@ -71,18 +77,36 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
                     {currentUser.role === 'requester' ? t.requests.myRequests : t.requests.allRequests}
                 </h1>
                 <div className="flex gap-sm">
-                    <select
-                        className="input select"
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                    >
-                        <option value="all">{t.requests.allStatus}</option>
-                        <option value="open">{t.status.open}</option>
-                        <option value="pending">{t.status.pending}</option>
-                        <option value="approved">{t.status.approved}</option>
-                        <option value="purchased">{t.status.purchased || 'Comprado'}</option>
-                        <option value="rejected">{t.status.rejected}</option>
-                    </select>
+                    <div className="flex gap-sm items-center">
+                        <input
+                            type="text"
+                            placeholder="Buscar por ID"
+                            className="input"
+                            style={{ width: '120px' }}
+                            value={searchId}
+                            onChange={(e) => setSearchId(e.target.value)}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Buscar por Solicitante"
+                            className="input"
+                            style={{ width: '180px' }}
+                            value={searchRequester}
+                            onChange={(e) => setSearchRequester(e.target.value)}
+                        />
+                        <select
+                            className="input select"
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                        >
+                            <option value="all">{t.requests.allStatus}</option>
+                            <option value="open">{t.status.open}</option>
+                            <option value="pending">{t.status.pending}</option>
+                            <option value="approved">{t.status.approved}</option>
+                            <option value="purchased">{t.status.purchased || 'Comprado'}</option>
+                            <option value="rejected">{t.status.rejected}</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -96,6 +120,7 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
                         <thead>
                             <tr className="text-left border-b bg-slate-50">
                                 <th className="p-md text-sm text-muted font-medium">ID</th>
+                                <th className="p-md text-sm text-muted font-medium">Data</th>
                                 <th className="p-md text-sm text-muted font-medium">{t.dashboard.description}</th>
                                 <th className="p-md text-sm text-muted font-medium">{t.requests.requester}</th>
                                 <th className="p-md text-sm text-muted font-medium">{t.dashboard.amount}</th>
@@ -109,6 +134,9 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
                             {filteredRequests.map((req) => (
                                 <tr key={req.id} className="border-b last:border-0 hover:bg-slate-50 transition-colors">
                                     <td className="p-md font-medium">{generatePOId(req.createdAt)}</td>
+                                    <td className="p-md text-sm text-muted">
+                                        {new Date(req.createdAt).toLocaleDateString('pt-BR')}
+                                    </td>
                                     <td className="p-md">
                                         {req.desc}
                                         {req.items && req.items.length > 0 && (
