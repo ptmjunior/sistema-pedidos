@@ -42,10 +42,7 @@ const ViewRequestModal = ({ request, onClose }) => {
                                     <span className="detail-label">{t.dashboard.date}:</span>
                                     <span className="detail-value">{request.date}</span>
                                 </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">{t.approvals.deliveryDate}:</span>
-                                    <span className="detail-value">{request.deliveryDate || 'N/A'}</span>
-                                </div>
+
                             </div>
                             <div className="mt-md">
                                 <span className="detail-label block mb-xs">{t.dashboard.description}:</span>
@@ -233,7 +230,7 @@ const ViewRequestModal = ({ request, onClose }) => {
                     }
                 }
             `}</style>
-        </div>
+        </div >
     );
 };
 

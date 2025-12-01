@@ -136,7 +136,6 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
                                 <th className="p-md text-sm text-muted font-medium">{t.dashboard.amount}</th>
                                 <th className="p-md text-sm text-muted font-medium">{t.requests.priority}</th>
                                 <th className="p-md text-sm text-muted font-medium">{t.dashboard.status}</th>
-                                <th className="p-md text-sm text-muted font-medium">{t.requests.delivery}</th>
                                 <th className="p-md text-sm text-muted font-medium">{t.requests.actions}</th>
                             </tr>
                         </thead>
@@ -164,7 +163,6 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
                                             {t.status[req.status] || req.status}
                                         </span>
                                     </td>
-                                    <td className="p-md text-muted text-sm">{req.deliveryDate || 'N/A'}</td>
                                     <td className="p-md flex gap-sm">
                                         {/* Buyer can mark approved as purchased */}
                                         {currentUser.role === 'buyer' && req.status === 'approved' && (

@@ -11,7 +11,7 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
     const [formData, setFormData] = useState({
         desc: '',
         priority: 'medium',
-        deliveryDate: '',
+        priority: 'medium',
         notes: '',
         editComment: ''
     });
@@ -34,7 +34,7 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
             setFormData({
                 desc: initialData.desc || '',
                 priority: initialData.priority || 'medium',
-                deliveryDate: initialData.deliveryDate || '',
+                priority: initialData.priority || 'medium',
                 notes: initialData.notes || ''
             });
 
@@ -107,7 +107,6 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
         const requestData = {
             desc: formData.desc,
             priority: formData.priority,
-            deliveryDate: formData.deliveryDate,
             notes: formData.notes,
             items: items,
             amount: calculateTotal(),
@@ -184,17 +183,6 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
                                 <option value="high">{t.createOrder.high}</option>
                             </select>
                         </div>
-                    </div>
-                    <div className="form-group">
-                        <label className="label">{t.createOrder.deliveryDate}</label>
-                        <input
-                            type="date"
-                            name="deliveryDate"
-                            className="input"
-                            value={formData.deliveryDate}
-                            onChange={handleChange}
-                            required
-                        />
                     </div>
                 </div>
 

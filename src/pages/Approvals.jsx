@@ -109,10 +109,7 @@ const Approvals = ({ onNavigate }) => {
                                             {t.requests[selectedRequest.priority || 'medium']}
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="label text-muted">{t.approvals.deliveryDate}</label>
-                                        <div className="font-medium">{selectedRequest.deliveryDate || 'N/A'}</div>
-                                    </div>
+
                                 </div>
                                 <div className="mt-md">
                                     <label className="label text-muted">{t.dashboard.description}</label>
