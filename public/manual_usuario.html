@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual do Usuário - Sistema de Pedidos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #0c9c9c 0%, #0a7070 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0c9c9c 0%, #0a7070 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .toc {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h3 {
+            color: #0c9c9c;
+            margin-bottom: 1rem;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin: 0.5rem 0;
+        }
+
+        .toc a {
+            color: #1f2937;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            background: #e5e7eb;
+            color: #0c9c9c;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 2rem;
+        }
+
+        .section h2 {
+            color: #0c9c9c;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h3 {
+            color: #1f2937;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid #0c9c9c;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+
+        .step-box {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .step-box h4 {
+            color: #0c9c9c;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .steps-list {
+            margin: 1rem 0;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: #0c9c9c;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .tip-box {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .tip-box strong {
+            color: #065f46;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .role-admin {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-requester {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .role-approver {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .role-buyer {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .status-open {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-purchased {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .priority-low {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        ul,
+        ol {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #0c9c9c;
+        }
+
+        .faq-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .faq-question {
+            color: #0c9c9c;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .contact-box {
+            background: linear-gradient(135deg, #0c9c9c 0%, #0a7070 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .contact-box h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .contact-box a {
+            color: white;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .footer {
+            background: #f9fafb;
+            padding: 1.5rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .toc {
+                display: none;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📖 Manual do Usuário</h1>
+            <p>Sistema de Pedidos - Casa das Tintas</p>
+        </div>
+
+        <div class="content">
+            <div class="toc">
+                <h3>📑 Índice</h3>
+                <ul>
+                    <li><a href="#intro">📋 O que é este sistema?</a></li>
+                    <li><a href="#como-funciona">🎯 Como Funciona?</a></li>
+                    <li><a href="#primeiro-acesso">🔐 Primeiro Acesso</a></li>
+                    <li><a href="#navegacao">📱 Navegação no Sistema</a></li>
+                    <li><a href="#criar-pedido">✏️ Como Criar um Pedido</a></li>
+                    <li><a href="#visualizar-pedidos">📊 Visualizando Seus Pedidos</a></li>
+                    <li><a href="#aprovadores">✅ Para Aprovadores</a></li>
+                    <li><a href="#compradores">🛒 Para Compradores</a></li>
+                    <li><a href="#administradores">👤 Para Administradores</a></li>
+                    <li><a href="#notificacoes">🔔 Notificações</a></li>
+                    <li><a href="#faq">🆘 Dúvidas Frequentes</a></li>
+                    <li><a href="#suporte">📞 Suporte</a></li>
+                </ul>
+            </div>
+
+            <div id="intro" class="section">
+                <h2>📋 O que é este sistema?</h2>
+                <div class="intro-box">
+                    Um sistema para solicitar, aprovar e gerenciar pedidos de compra de forma organizada e rastreável,
+                    garantindo transparência e controle em todas as etapas do processo.
+                </div>
+            </div>
+
+            <div id="como-funciona" class="section">
+                <h2>🎯 Como Funciona?</h2>
+
+                <div class="step-box">
+                    <h4>1️⃣ Solicitante cria um pedido</h4>
+                    <p>Você precisa comprar algo para a empresa? Entre no sistema e crie um pedido detalhando:</p>
+                    <ul>
+                        <li>Descrição geral</li>
+                        <li>Itens necessários (com quantidade, preço e link)</li>
+                        <li>Prioridade (baixa, média, alta)</li>
+                        <li>Observações</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <h4>2️⃣ Aprovador analisa e decide</h4>
+                    <p>O aprovador recebe uma notificação e pode:</p>
+                    <ul>
+                        <li>✅ <strong>Aprovar</strong> - Pedido segue para compra</li>
+                        <li>❌ <strong>Rejeitar</strong> - Pedido não será realizado</li>
+                        <li>💬 <strong>Solicitar mais informações</strong> - Pedido volta para você ajustar</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <h4>3️⃣ Comprador efetua a compra</h4>
+                    <p>Após aprovado, o comprador:</p>
+                    <ul>
+                        <li>Visualiza itens aprovados</li>
+                        <li>Realiza a compra</li>
+                        <li>Marca como "Comprado" informando previsão de entrega</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <h4>4️⃣ Você acompanha tudo</h4>
+                    <p>Receba notificações em tempo real sobre:</p>
+                    <ul>
+                        <li>Aprovações</li>
+                        <li>Rejeições</li>
+                        <li>Solicitações de alteração</li>
+                        <li>Confirmação de compra</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="primeiro-acesso" class="section">
+                <h2>🔐 Primeiro Acesso</h2>
+
+                <h3>Recebendo o Convite</h3>
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div>Você receberá um <strong>email com link</strong> de convite</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div>Clique no link para acessar a página de registro</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div>Preencha:
+                            <ul>
+                                <li>Nome completo</li>
+                                <li>Senha (mínimo 6 caracteres)</li>
+                                <li>Confirmação de senha</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div>Clique em <strong>"Criar Conta"</strong></div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div>Pronto! Você será automaticamente logado</div>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Importante:</strong>
+                    O link de convite expira em 7 dias.
+                </div>
+            </div>
+
+            <div id="navegacao" class="section">
+                <h2>📱 Navegação no Sistema</h2>
+
+                <h3>Tela Inicial (Dashboard)</h3>
+                <ul>
+                    <li>Resumo de pedidos pendentes, aprovados e total gasto</li>
+                    <li>Acesso rápido às funcionalidades</li>
+                </ul>
+
+                <h3>Menu Lateral</h3>
+                <p>Dependendo do seu perfil, você verá:</p>
+                <ul>
+                    <li>🏠 <strong>Dashboard</strong> - Visão geral</li>
+                    <li>📝 <strong>Criar Pedido</strong> - Novo pedido</li>
+                    <li>📋 <strong>Pedidos</strong> - Lista de todos os pedidos</li>
+                    <li>✅ <strong>Aprovações</strong> - Pedidos aguardando sua aprovação<span
+                            class="role-badge role-approver">Aprovadores</span></li>
+                    <li>🏢 <strong>Fornecedores</strong> - Gerenciar fornecedores<span
+                            class="role-badge role-buyer">Compradores</span></li>
+                    <li>👥 <strong>Usuários</strong> - Gerenciar usuários<span
+                            class="role-badge role-admin">Admins</span></li>
+                    <li>🔒 <strong>Domínios Permitidos</strong> - Gerenciar emails<span
+                            class="role-badge role-admin">Admins</span></li>
+                </ul>
+            </div>
+
+            <div id="criar-pedido" class="section">
+                <h2>✏️ Como Criar um Pedido <span class="role-badge role-requester">Solicitante</span></h2>
+
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div>Clique em <strong>"Criar Pedido"</strong> no menu</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div>Preencha a <strong>descrição geral</strong> (ex: "Material de escritório")</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div>Escolha a <strong>prioridade</strong>:
+                            <br>
+                            <span class="priority-badge priority-low">🟢 Baixa</span> - Pode esperar
+                            <br>
+                            <span class="priority-badge priority-medium">🟡 Média</span> - Normal
+                            <br>
+                            <span class="priority-badge priority-high">🔴 Alta</span> - Urgente
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div><strong>Adicione os itens:</strong>
+                            <ul>
+                                <li>Descrição do item</li>
+                                <li>Categoria</li>
+                                <li>Fornecedor (opcional)</li>
+                                <li>Link do produto (para referência)</li>
+                                <li>Quantidade</li>
+                                <li>Preço unitário</li>
+                                <li>Clique em "Adicionar Item"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div>Adicione <strong>observações</strong> se necessário</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">6</div>
+                        <div>Clique em <strong>"Enviar Pedido"</strong></div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <strong>💡 Dica:</strong>
+                    O valor total é calculado automaticamente!
+                </div>
+            </div>
+
+            <div id="visualizar-pedidos" class="section">
+                <h2>📊 Visualizando Seus Pedidos</h2>
+
+                <h3>Na lista de pedidos você verá:</h3>
+                <ul>
+                    <li><strong>ID do Pedido</strong> (ex: PO-2024-001)</li>
+                    <li><strong>Data de criação</strong></li>
+                    <li><strong>Descrição</strong></li>
+                    <li><strong>Valor total</strong></li>
+                    <li><strong>Prioridade</strong> (🟢🟡🔴)</li>
+                    <li><strong>Status atual</strong>:
+                        <br><span class="status-badge status-open">Aberto</span> - Aguardando aprovação
+                        <br><span class="status-badge status-pending">Pendente</span> - Aguardando suas alterações
+                        <br><span class="status-badge status-approved">Aprovado</span> - Aprovado para compra
+                        <br><span class="status-badge status-purchased">Comprado</span> - Já foi comprado
+                        <br><span class="status-badge status-rejected">Rejeitado</span> - Não aprovado
+                    </li>
+                </ul>
+
+                <h3>Ações disponíveis:</h3>
+                <ul>
+                    <li>👁️ <strong>Ver Detalhes</strong> - Visualizar pedido completo</li>
+                    <li>✏️ <strong>Editar</strong> - Modificar (apenas se estiver pendente)</li>
+                </ul>
+            </div>
+
+            <div id="aprovadores" class="section">
+                <h2>✅ Para Aprovadores <span class="role-badge role-approver">Aprovador</span></h2>
+
+                <h3>Analisando Pedidos</h3>
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div>Acesse <strong>"Aprovações"</strong> no menu</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div>Clique em <strong>"Analisar"</strong> em um pedido</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div>Revise:
+                            <ul>
+                                <li>Detalhes do pedido</li>
+                                <li>Itens solicitados</li>
+                                <li>Valor total</li>
+                                <li>Histórico de alterações</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Decisões:</h3>
+
+                <div class="step-box">
+                    <h4>✅ Aprovar</h4>
+                    <ul>
+                        <li>Adicione um comentário com sua análise (opcional)</li>
+                        <li>O pedido segue para o comprador</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <h4>❌ Rejeitar</h4>
+                    <ul>
+                        <li><strong>OBRIGATÓRIO</strong> explicar o motivo da rejeição</li>
+                        <li>O solicitante é notificado</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <h4>💬 Solicitar Mais Informações</h4>
+                    <ul>
+                        <li><strong>OBRIGATÓRIO</strong> detalhar o que precisa ser alterado</li>
+                        <li>O pedido volta para o solicitante editar</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="compradores" class="section">
+                <h2>🛒 Para Compradores <span class="role-badge role-buyer">Comprador</span></h2>
+
+                <h3>Finalizando Compras</h3>
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div>Acesse <strong>"Pedidos"</strong></div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div>Filtre por <strong>"Aprovado"</strong></div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div>Clique no pedido</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div>Pressione <strong>"✓ Marcar como Comprado"</strong></div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div>Informe a <strong>data prevista de entrega</strong> para cada item</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">6</div>
+                        <div>Adicione <strong>observações</strong> (ex: "Comprado na Loja X")</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">7</div>
+                        <div>Confirme</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="administradores" class="section">
+                <h2>👤 Para Administradores <span class="role-badge role-admin">Admin</span></h2>
+
+                <h3>Convidar Novo Usuário</h3>
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div>Vá em <strong>"Usuários"</strong> → <strong>"Gerenciar Convites"</strong></div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div>Clique em <strong>"Gerar Novo Convite"</strong></div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div>Preencha:
+                            <ul>
+                                <li>Email do convidado</li>
+                                <li>Papel (Solicitante/Aprovador/Comprador)</li>
+                                <li>Departamento</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div>Copie o link gerado</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div>Envie para o usuário</div>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Lembre-se:</strong>
+                    O link expira em 7 dias!
+                </div>
+
+                <h3>Gerenciar Domínios</h3>
+                <p>Para permitir emails de um novo domínio:</p>
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div>Vá em <strong>"Domínios Permitidos"</strong></div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div>Clique em <strong>"Adicionar Domínio"</strong></div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div>Digite o domínio (ex: <code>empresa.com.br</code>)</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div>Salve</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="notificacoes" class="section">
+                <h2>🔔 Notificações</h2>
+
+                <h3>Você será notificado quando:</h3>
+                <ul>
+                    <li>✅ Seu pedido for aprovado</li>
+                    <li>❌ Seu pedido for rejeitado</li>
+                    <li>💬 Solicitarem alterações</li>
+                    <li>🛒 Seu pedido for comprado</li>
+                    <li>📝 Houver novo pedido para aprovar <span class="role-badge role-approver">Aprovadores</span>
+                    </li>
+                </ul>
+
+                <h3>Como ver notificações:</h3>
+                <ul>
+                    <li>Clique no ícone 🔔 no canto superior direito</li>
+                    <li>Notificações não lidas aparecem em <strong>negrito</strong></li>
+                    <li>Clique em uma notificação para ver o pedido</li>
+                </ul>
+            </div>
+
+            <div id="faq" class="section">
+                <h2>🆘 Dúvidas Frequentes</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">❓ Esqueci minha senha</div>
+                    <div class="faq-answer">
+                        <ul>
+                            <li>Na tela de login, clique em "Esqueci minha senha"</li>
+                            <li>Siga as instruções enviadas para seu email</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">❓ Posso cancelar um pedido?</div>
+                    <div class="faq-answer">
+                        Sim, desde que esteja "Aberto" ou "Pendente". Você pode editá-lo ou pedir ao Admin para excluir.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">❓ Como vejo o histórico de um pedido?</div>
+                    <div class="faq-answer">
+                        <ul>
+                            <li>Clique no pedido → Visualizar detalhes</li>
+                            <li>Role até o final para ver todos os comentários</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">❓ Posso alterar meu perfil?</div>
+                    <div class="faq-answer">
+                        <ul>
+                            <li>Clique no seu nome no canto superior direito</li>
+                            <li>Vá em "Perfil" para alterar nome e senha</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="suporte" class="section">
+                <div class="contact-box">
+                    <h3>📞 Suporte</h3>
+                    <p>Para dúvidas ou problemas técnicos, entre em contato com:</p>
+                    <p style="margin-top: 1rem; font-size: 1.1rem;">
+                        <strong>Administrador do Sistema:</strong><br>
+                        <a href="mailto:pedro@casadastintas-al.com.br">pedro@casadastintas-al.com.br</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Sistema de Pedidos - Casa das Tintas | Versão 1.0</p>
+            <p style="margin-top: 0.5rem;">Manual do Usuário - Todas as funcionalidades explicadas</p>
+        </div>
+    </div>
+</body>
+
+</html>

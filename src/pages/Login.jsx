@@ -97,6 +97,13 @@ const Login = ({ onNavigate }) => {
                     </button>
                 </div>
 
+                <div className="copyright-footer">
+                    <p>© 2024 Casa das Tintas. Todos os direitos reservados.</p>
+                    <p className="developer-credits">
+                        Desenvolvido por <strong>Pedro Tenório Mascarenhas Júnior</strong>
+                    </p>
+                </div>
+
             </div>
 
             <style>{`
@@ -147,6 +154,24 @@ const Login = ({ onNavigate }) => {
                     border-top: 1px solid var(--color-border);
                     padding-top: var(--spacing-md);
                     text-align: center;
+                }
+
+                .copyright-footer {
+                    margin-top: var(--spacing-lg);
+                    padding-top: var(--spacing-md);
+                    border-top: 1px solid var(--color-border);
+                    text-align: center;
+                    font-size: 0.85rem;
+                    color: var(--color-text-muted);
+                }
+
+                .developer-credits {
+                    margin-top: var(--spacing-xs);
+                    font-size: 0.8rem;
+                }
+
+                .developer-credits strong {
+                    color: var(--color-primary);
                 }
 
                 .demo-users {

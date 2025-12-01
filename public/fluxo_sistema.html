@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxo do Sistema - Casa das Tintas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #0c9c9c 0%, #0a7070 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0c9c9c 0%, #0a7070 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section h2 {
+            color: #0c9c9c;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .section h3 {
+            color: #1f2937;
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        .intro-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0c9c9c;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: #0c9c9c;
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .role-admin {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-requester {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .role-approver {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .role-buyer {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-purchased {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .flow-diagram {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid #0c9c9c;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem auto;
+            max-width: 400px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .flow-arrow {
+            color: #0c9c9c;
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .flow-decision {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .notification-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .notification-box strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .tech-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .tech-item strong {
+            color: #0c9c9c;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        ul {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        .checkmark {
+            color: #059669;
+        }
+
+        .crossmark {
+            color: #dc2626;
+        }
+
+        .footer {
+            background: #f9fafb;
+            padding: 1.5rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Fluxo do Sistema</h1>
+            <p>Sistema de Pedidos - Casa das Tintas</p>
+        </div>
+
+        <div class="content">
+            <div class="intro-box">
+                <h3 style="margin-top: 0;">🎯 Visão Geral</h3>
+                <p>Sistema de gerenciamento de pedidos de compra com fluxo de aprovação em múltiplas etapas, controle de
+                    permissões por papel (role) e rastreabilidade completa.</p>
+            </div>
+
+            <div class="section">
+                <h2>👥 Papéis (Roles)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Papel</th>
+                            <th>Descrição</th>
+                            <th>Capacidades</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="role-badge role-admin">Admin</span></td>
+                            <td>Administrador do sistema</td>
+                            <td>Todas as permissões + gerenciar usuários e domínios</td>
+                        </tr>
+                        <tr>
+                            <td><span class="role-badge role-requester">Requester</span></td>
+                            <td>Solicitante</td>
+                            <td>Criar e acompanhar próprios pedidos</td>
+                        </tr>
+                        <tr>
+                            <td><span class="role-badge role-approver">Approver</span></td>
+                            <td>Aprovador</td>
+                            <td>Visualizar, aprovar/rejeitar/solicitar alterações em pedidos</td>
+                        </tr>
+                        <tr>
+                            <td><span class="role-badge role-buyer">Buyer</span></td>
+                            <td>Comprador</td>
+                            <td>Marcar pedidos aprovados como comprados e gerenciar fornecedores</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🔄 Fluxo de Pedidos</h2>
+                <div class="flow-diagram">
+                    <div class="flow-step">Solicitante cria pedido</div>
+                    <div class="flow-arrow">⬇️</div>
+                    <div class="flow-step">Status: <span class="status-badge status-open">OPEN</span></div>
+                    <div class="flow-arrow">⬇️</div>
+                    <div class="flow-step">Aprovador analisa</div>
+                    <div class="flow-arrow">⬇️</div>
+                    <div class="flow-step flow-decision">Decisão do Aprovador</div>
+                    <div class="flow-arrow">⬇️ ⬇️ ⬇️</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div>
+                            <div class="flow-step" style="background: #dcfce7; border-color: #10b981;">✅ Aprovar</div>
+                            <div class="flow-arrow">⬇️</div>
+                            <div class="flow-step">Status: <span class="status-badge status-approved">APPROVED</span>
+                            </div>
+                            <div class="flow-arrow">⬇️</div>
+                            <div class="flow-step">Comprador marca como comprado</div>
+                            <div class="flow-arrow">⬇️</div>
+                            <div class="flow-step">Status: <span class="status-badge status-purchased">PURCHASED</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flow-step" style="background: #fee2e2; border-color: #ef4444;">❌ Rejeitar</div>
+                            <div class="flow-arrow">⬇️</div>
+                            <div class="flow-step">Status: <span class="status-badge status-rejected">REJECTED</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flow-step" style="background: #fef3c7; border-color: #f59e0b;">💬 Solicitar
+                                alterações</div>
+                            <div class="flow-arrow">⬇️</div>
+                            <div class="flow-step">Status: <span class="status-badge status-pending">PENDING</span>
+                            </div>
+                            <div class="flow-arrow">⬇️</div>
+                            <div class="flow-step">Solicitante edita</div>
+                            <div class="flow-arrow">⬆️ Volta para OPEN</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📋 Status dos Pedidos</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Descrição</th>
+                            <th>Quem pode alterar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="status-badge status-open">Open</span></td>
+                            <td>Pedido aguardando aprovação</td>
+                            <td>Sistema (criação)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>Aguardando alterações do solicitante</td>
+                            <td>Aprovador (solicita) → Solicitante (edita)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-badge status-approved">Approved</span></td>
+                            <td>Pedido aprovado</td>
+                            <td>Aprovador</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-badge status-rejected">Rejected</span></td>
+                            <td>Pedido rejeitado</td>
+                            <td>Aprovador</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-badge status-purchased">Purchased</span></td>
+                            <td>Pedido comprado</td>
+                            <td>Comprador</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>📧 Fluxo de Convites</h2>
+                <ol style="margin-left: 2rem;">
+                    <li><strong>Admin gera convite</strong>
+                        <ul>
+                            <li>Define: email, papel, departamento</li>
+                            <li>Sistema cria token único válido por 7 dias</li>
+                        </ul>
+                    </li>
+                    <li><strong>Usuário recebe link</strong>
+                        <ul>
+                            <li>Formato: <code>pedido.lojacasadastintas.com.br/invite/{token}</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Usuário se registra</strong>
+                        <ul>
+                            <li>Define nome e senha</li>
+                            <li>Email e papel já pré-definidos</li>
+                        </ul>
+                    </li>
+                    <li><strong>Sistema valida</strong>
+                        <ul>
+                            <li>Verifica domínio de email está na whitelist</li>
+                            <li>Cria conta no Supabase Auth</li>
+                            <li>Marca convite como usado</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="section">
+                <h2>🔔 Notificações</h2>
+                <h3>Quando são geradas:</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>Notificação para</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Novo pedido criado</td>
+                            <td>Todos os Aprovadores e Admins</td>
+                            <td><code>submission</code></td>
+                        </tr>
+                        <tr>
+                            <td>Pedido aprovado</td>
+                            <td>Solicitante + Todos os Compradores</td>
+                            <td><code>approval</code></td>
+                        </tr>
+                        <tr>
+                            <td>Pedido rejeitado</td>
+                            <td>Solicitante</td>
+                            <td><code>rejection</code></td>
+                        </tr>
+                        <tr>
+                            <td>Mais informações solicitadas</td>
+                            <td>Solicitante</td>
+                            <td><code>more_info_requested</code></td>
+                        </tr>
+                        <tr>
+                            <td>Pedido comprado</td>
+                            <td>Solicitante</td>
+                            <td><code>purchased</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>👁️ Permissões de Visualização</h2>
+
+                <h3>Solicitante</h3>
+                <ul>
+                    <li><span class="checkmark">✅</span> Próprios pedidos (todos os status)</li>
+                    <li><span class="crossmark">❌</span> Pedidos de outros</li>
+                </ul>
+
+                <h3>Comprador</h3>
+                <ul>
+                    <li><span class="checkmark">✅</span> Pedidos aprovados (de todos)</li>
+                    <li><span class="checkmark">✅</span> Pedidos comprados (de todos)</li>
+                    <li><span class="checkmark">✅</span> Pedidos abertos (de todos)</li>
+                    <li><span class="checkmark">✅</span> Próprios pedidos (todos os status)</li>
+                </ul>
+
+                <h3>Aprovador</h3>
+                <ul>
+                    <li><span class="checkmark">✅</span> Todos os pedidos</li>
+                </ul>
+
+                <h3>Admin</h3>
+                <ul>
+                    <li><span class="checkmark">✅</span> Todos os pedidos</li>
+                    <li><span class="checkmark">✅</span> Gerenciar usuários</li>
+                    <li><span class="checkmark">✅</span> Gerenciar domínios permitidos</li>
+                    <li><span class="checkmark">✅</span> Excluir pedidos</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>🔒 Segurança</h2>
+
+                <h3>Email Whitelisting</h3>
+                <ul>
+                    <li>Apenas domínios aprovados podem ser convidados</li>
+                    <li>Admin gerencia lista de domínios</li>
+                    <li>Validação no backend (Supabase)</li>
+                </ul>
+
+                <h3>Row Level Security (RLS)</h3>
+                <ul>
+                    <li>Políticas no banco garantem acesso correto</li>
+                    <li>Usuário só vê dados que tem permissão</li>
+                    <li>Não depende apenas do frontend</li>
+                </ul>
+
+                <h3>Autenticação</h3>
+                <ul>
+                    <li>Supabase Auth (JWT tokens)</li>
+                    <li>Rate limiting automático</li>
+                    <li>Proteção contra brute force</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>💻 Tecnologias</h2>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <strong>Frontend</strong>
+                        <p>React + Vite</p>
+                    </div>
+                    <div class="tech-item">
+                        <strong>Backend</strong>
+                        <p>Supabase<br>(PostgreSQL + Auth + RLS)</p>
+                    </div>
+                    <div class="tech-item">
+                        <strong>Hosting</strong>
+                        <p>Cloudflare Pages</p>
+                    </div>
+                    <div class="tech-item">
+                        <strong>DNS</strong>
+                        <p>Cloudflare</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Sistema de Pedidos - Casa das Tintas | Versão 1.0</p>
+            <p style="margin-top: 0.5rem;">Documentação Técnica do Sistema</p>
+        </div>
+    </div>
+</body>
+
+</html>
