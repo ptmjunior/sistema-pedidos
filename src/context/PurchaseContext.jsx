@@ -449,6 +449,26 @@ export const PurchaseProvider = ({ children }) => {
         }
     };
 
+    const deleteRequest = async (id) => {
+        try {
+            const { error } = await supabase
+                .from('purchase_requests')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            // Reload data
+            await loadRequests();
+            if (currentUser) {
+                await loadNotifications(currentUser.id);
+            }
+        } catch (error) {
+            console.error('Error deleting request:', error);
+            throw error;
+        }
+    };
+
     const updateStatus = async (id, status, dates = null, comments = '') => {
         try {
             // Get current request to track old status
@@ -746,6 +766,7 @@ export const PurchaseProvider = ({ children }) => {
             addRequest,
             updateRequest,
             updateStatus,
+            deleteRequest,
             addVendor,
             login, // Legacy
             logout,

@@ -8,7 +8,7 @@ import PurchaseConfirmationModal from '../components/PurchaseConfirmationModal';
 import ViewRequestModal from '../components/ViewRequestModal';
 
 const Requests = ({ onNavigate, initialViewingRequestId }) => {
-    const { requests, currentUser, updateStatus } = usePurchase();
+    const { requests, currentUser, updateStatus, deleteRequest } = usePurchase();
     const [filter, setFilter] = useState('all');
     const [searchId, setSearchId] = useState('');
     const [searchRequester, setSearchRequester] = useState('');
@@ -67,6 +67,16 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
             alert('Erro ao marcar como comprado. Tente novamente.');
         } finally {
             setIsProcessing(false);
+        }
+    };
+
+    const handleDelete = async (id, desc) => {
+        if (window.confirm(`Tem certeza que deseja excluir o pedido "${desc}"?\n\nEsta ação não pode ser desfeita.`)) {
+            try {
+                await deleteRequest(id);
+            } catch (error) {
+                alert('Erro ao excluir pedido.');
+            }
         }
     };
 
@@ -182,6 +192,17 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
                                                 Ver Detalhes
                                             </button>
                                         )}
+
+                                        {/* Admin Delete Button */}
+                                        {currentUser.role === 'admin' && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(req.id, req.desc); }}
+                                                className="btn-text text-red-600 ml-sm"
+                                                title="Excluir Pedido"
+                                            >
+                                                Excluir
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -234,6 +255,8 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
                 .priority-low { background-color: #22c55e; }
                 .priority-medium { background-color: #eab308; }
                 .priority-high { background-color: #ef4444; }
+                .text-red-600 { color: #dc2626; }
+                .ml-sm { margin-left: 0.5rem; }
               `}</style>
         </Layout>
     );
