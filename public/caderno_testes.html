@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caderno de Testes - Sistema de Pedidos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #0c9c9c 0%, #0a7070 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0c9c9c 0%, #0a7070 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .intro {
+            background: #f0f9ff;
+            border-left: 4px solid#0c9c9c;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+        
+        .test-section {
+            margin-bottom: 2rem;
+        }
+        
+        .test-section h2 {
+            color: #0c9c9c;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .test-case {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .test-case:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #0c9c9c;
+        }
+        
+        .test-case h3 {
+            color: #1f2937;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .test-number {
+            background: #0c9c9c;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .steps {
+            margin: 1rem 0;
+        }
+        
+        .step {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f9fafb;
+            border-radius: 6px;
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .step-number {
+            background: #e5e7eb;
+            color: #6b7280;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .expected {
+            background: #ecfdf5;
+            border-left: 3px solid #10b981;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+        
+        .expected strong {
+            color: #065f46;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 6px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #0c9c9c;
+        }
+        
+        .checkbox-item label {
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .success {
+            color: #059669;
+        }
+        
+        .error {
+            color: #dc2626;
+        }
+        
+        .warning {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+        
+        .warning strong {
+            color: #92400e;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .role-admin { background: #dbeafe; color: #1e40af; }
+        .role-requester { background: #dcfce7; color: #15803d; }
+        .role-approver { background: #fef3c7; color: #92400e; }
+        .role-buyer { background: #e0e7ff; color: #4338ca; }
+        
+        .footer {
+            background: #f9fafb;
+            padding: 1.5rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+            }
+            
+            .test-case {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Caderno de Testes</h1>
+            <p>Sistema de Pedidos - Casa das Tintas</p>
+        </div>
+        
+        <div class="content">
+            <div class="intro">
+                <h3 style="margin-bottom: 0.5rem;">📝 Instruções para Teste</h3>
+                <p>Este documento contém cenários de teste para validar todas as funcionalidades do sistema. Marque cada teste como ✅ Passou ou ❌ Falhou após executar.</p>
+            </div>
+            
+            <!-- TESTES DE AUTENTICAÇÃO -->
+            <div class="test-section">
+                <h2>🔐 1. Autenticação e Acesso</h2>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">1.1</span> Login com Credenciais Válidas</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Acesse a URL do sistema</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Digite email e senha corretos</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Clique em "Entrar"</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Deve redirecionar para o Dashboard com mensagem de boas-vindas
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test1-1-pass">
+                            <label for="test1-1-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test1-1-fail">
+                            <label for="test1-1-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">1.2</span> Login com Senha Incorreta</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Digite email válido e senha ERRADA</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Clique em "Entrar"</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Deve exibir mensagem de erro "Email ou senha inválidos"
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test1-2-pass">
+                            <label for="test1-2-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test1-2-fail">
+                            <label for="test1-2-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">1.3</span> Recuperação de Senha</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Clique em "Esqueci minha senha"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Digite seu email</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Verifique sua caixa de email</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Clique no link recebido e defina nova senha</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Email de recuperação deve ser recebido e senha alterada com sucesso
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test1-3-pass">
+                            <label for="test1-3-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test1-3-fail">
+                            <label for="test1-3-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TESTES DE CONVITES -->
+            <div class="test-section">
+                <h2>📧 2. Sistema de Convites <span class="role-badge role-admin">Admin</span></h2>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">2.1</span> Gerar Convite para Novo Usuário</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Vá em Usuários → Gerenciar Convites</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Clique em "Gerar Novo Convite"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Preencha: email, papel (Solicitante), departamento</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Clique em "Gerar Convite"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">5</span>
+                            <span>Copie o link gerado</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Link de convite deve ser gerado e aparecer na lista de convites pendentes
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test2-1-pass">
+                            <label for="test2-1-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test2-1-fail">
+                            <label for="test2-1-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">2.2</span> Aceitar Convite e Registrar</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Abra o link do convite em navegador anônimo</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Preencha nome completo e senha</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Confirme a senha</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Clique em "Criar Conta"</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Usuário deve ser criado e automaticamente logado no sistema
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test2-2-pass">
+                            <label for="test2-2-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test2-2-fail">
+                            <label for="test2-2-fail" class="error">❌ Falhou</label>
+
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">2.3</span> Cancelar Convite</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Gere um novo convite</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Na lista de convites, clique em "Cancelar"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Confirme o cancelamento</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Convite deve mudar para status "Cancelado" e link não pode mais ser usado
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test2-3-pass">
+                            <label for="test2-3-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test2-3-fail">
+                            <label for="test2-3-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TESTES DE PEDIDOS -->
+            <div class="test-section">
+                <h2>📝 3. Criação de Pedidos <span class="role-badge role-requester">Solicitante</span></h2>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">3.1</span> Criar Pedido Completo</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Clique em "Criar Pedido"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Preencha descrição: "Materiais de Escritório"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Selecione prioridade: "Alta"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Adicione item: "Caneta Azul", categoria "Office", qtd 10, preço 2.50</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">5</span>
+                            <span>Adicione observação: "Preferência por canetas BIC"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">6</span>
+                            <span>Clique em "Enviar Pedido"</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Pedido criado com sucesso, status "Aberto", aprovadores notificados
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test3-1-pass">
+                            <label for="test3-1-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test3-1-fail">
+                            <label for="test3-1-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TESTES DE APROVAÇÃO -->
+            <div class="test-section">
+                <h2>✅ 4. Fluxo de Aprovações <span class="role-badge role-approver">Aprovador</span></h2>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">4.1</span> Aprovar Pedido</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Vá em "Aprovações"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Clique em "Analisar" em um pedido aberto</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Revise os itens e valores</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Clique em "Aprovar Pedido"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">5</span>
+                            <span>Adicione comentário (opcional) e confirme</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Pedido muda para "Aprovado", solicitante e compradores são notificados
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test4-1-pass">
+                            <label for="test4-1-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test4-1-fail">
+                            <label for="test4-1-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">4.2</span> Rejeitar Pedido</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Analise um pedido aberto</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Clique em "Rejeitar Pedido"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>OBRIGATÓRIO: Adicione motivo da rejeição</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Confirme</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Pedido muda para "Rejeitado", solicitante notificado com o motivo
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test4-2-pass">
+                            <label for="test4-2-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test4-2-fail">
+                            <label for="test4-2-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">4.3</span> Solicitar Mais Informações</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Analise um pedido</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Clique em "Solicitar Mais Informações"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>OBRIGATÓRIO: Detalhe o que precisa ser alterado</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Confirme</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Pedido muda para "Pendente", solicitante notificado e pode editar
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test4-3-pass">
+                            <label for="test4-3-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test4-3-fail">
+                            <label for="test4-3-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TESTES DE COMPRAS -->
+            <div class="test-section">
+                <h2>🛒 5. Finalização de Compras <span class="role-badge role-buyer">Comprador</span></h2>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">5.1</span> Marcar Pedido como Comprado</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Vá em "Pedidos" e filtre por "Aprovado"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Clique no pedido aprovado</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Clique em "✓ Marcar como Comprado"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Informe data prevista de entrega para cada item</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">5</span>
+                            <span>Adicione observação sobre a compra</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">6</span>
+                            <span>Confirme</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Pedido muda para "Comprado", solicitante notificado
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test5-1-pass">
+                            <label for="test5-1-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test5-1-fail">
+                            <label for="test5-1-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TESTES ADMINISTRATIVOS -->
+            <div class="test-section">
+                <h2>⚙️ 6. Funções Administrativas <span class="role-badge role-admin">Admin</span></h2>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">6.1</span> Adicionar Domínio Permitido</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Vá em "Domínios Permitidos"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Clique em "Adicionar Domínio"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                           <span>Digite um domínio de teste (ex: teste.com.br)</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Salve</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Domínio adicionado à lista e pode ser usado em convites
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test6-1-pass">
+                            <label for="test6-1-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test6-1-fail">
+                            <label for="test6-1-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">6.2</span> Desativar/Reativar Usuário</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Vá em "Usuários"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Clique no switch "Ativo/Inativo" de um usuário</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Tente fazer login com esse usuário</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Reative o usuário</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">5</span>
+                            <span>Tente login novamente</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Usuário inativo não consegue fazer login, ativo consegue
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test6-2-pass">
+                            <label for="test6-2-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test6-2-fail">
+                            <label for="test6-2-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">6.3</span> Excluir Pedido</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Crie um pedido de teste</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Na lista de pedidos, clique em "Excluir"</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Confirme a exclusão</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Pedido removido permanentemente do sistema
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test6-3-pass">
+                            <label for="test6-3-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test6-3-fail">
+                            <label for="test6-3-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TESTES DE NOTIFICAÇÕES -->
+            <div class="test-section">
+                <h2>🔔 7. Sistema de Notificações</h2>
+                
+                <div class="test-case">
+                    <h3><span class="test-number">7.1</span> Receber e Visualizar Notificação</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Aguarde uma notificação (ex: pedido aprovado)</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Verifique o sino no header (deve ter número)</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Clique no sino</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Clique na notificação</span>
+                        </div>
+                    </div>
+                    <div class="expected">
+                        <strong>✅ Resultado Esperado:</strong>
+                        Lista de notificações exibida, clique redireciona para pedido relacionado
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test7-1-pass">
+                            <label for="test7-1-pass" class="success">✅ Passou</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="test7-1-fail">
+                            <label for="test7-1-fail" class="error">❌ Falhou</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Observações Importantes:</strong>
+                <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                    <li>Teste em diferentes navegadores (Chrome, Firefox, Edge)</li>
+                    <li>Teste em dispositivos móveis (responsividade)</li>
+                    <li>Anote qualquer comportamento inesperado</li>
+                    <li>Verifique se todas as notificações estão sendo enviadas</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Sistema de Pedidos - Casa das Tintas | Versão 1.0</p>
+            <p style="margin-top: 0.5rem;">Para reportar problemas, entre em contato com o administrador</p>
+        </div>
+    </div>
+    
+    <script>
+        // Sincronizar checkboxes (não permitir marcar Passou e Falhou ao mesmo tempo)
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    const testId = this.id.split('-').slice(0, -1).join('-');
+                    const opposite = this.id.endsWith('-pass') ? `${testId}-fail` : `${testId}-pass`;
+                    const oppositeCheckbox = document.getElementById(opposite);
+                    if (oppositeCheckbox) {
+                        oppositeCheckbox.checked = false;
+                    }
+                }
+            });
+        });
+        
+        // Persistir estado dos checkboxes no localStorage
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            const savedState = localStorage.getItem(checkbox.id);
+            if (savedState === 'true') {
+                checkbox.checked = true;
+            }
+            
+            checkbox.addEventListener('change', function() {
+                localStorage.setItem(this.id, this.checked);
+            });
+        });
+    </script>
+</body>
+</html>
