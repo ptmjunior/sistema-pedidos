@@ -94,6 +94,15 @@ export const PurchaseProvider = ({ children }) => {
             if (error) throw error;
 
             if (data) {
+                // Check if user is active
+                if (data.active === false) {
+                    console.warn('User account is inactive');
+                    await supabase.auth.signOut();
+                    alert('Sua conta foi desativada. Entre em contato com o administrador.');
+                    setIsLoading(false);
+                    return;
+                }
+
                 setCurrentUser(data);
                 setIsAuthenticated(true);
                 // Load all data after authentication
@@ -311,8 +320,8 @@ export const PurchaseProvider = ({ children }) => {
                 if (itemsError) throw itemsError;
             }
 
-            // Create notifications for approvers
-            const approvers = users.filter(u => u.role === 'approver');
+            // Create notifications for approvers and admins
+            const approvers = users.filter(u => u.role === 'approver' || u.role === 'admin');
             if (approvers.length > 0) {
                 const submissionNotifications = approvers.map(approver => ({
                     recipient_id: approver.id,
@@ -544,6 +553,19 @@ export const PurchaseProvider = ({ children }) => {
 
     const addUser = async (newUser) => {
         try {
+            // Validate email domain before attempting to create user
+            const emailDomain = newUser.email.toLowerCase().split('@')[1];
+
+            const { data: allowedDomains, error: domainCheckError } = await supabase
+                .from('allowed_domains')
+                .select('domain')
+                .eq('domain', emailDomain)
+                .single();
+
+            if (domainCheckError || !allowedDomains) {
+                throw new Error(`O domínio de email "${emailDomain}" não é permitido. Apenas emails corporativos são aceitos. Contate o administrador para adicionar este domínio.`);
+            }
+
             // 1. Create Auth User (using a temporary client to avoid logging out current user)
             // We use the ANON key here, which allows sign up if enabled in Supabase
             const tempSupabase = createClient(
@@ -623,6 +645,10 @@ export const PurchaseProvider = ({ children }) => {
 
     const deleteUser = async (id) => {
         try {
+            // Note: This only soft-deletes by removing from users table
+            // The user's requests will remain in the system
+            // Auth user remains in Supabase Auth but won't be able to log in
+            // because profile is missing
             const { error } = await supabase
                 .from('users')
                 .delete()
@@ -632,6 +658,24 @@ export const PurchaseProvider = ({ children }) => {
             await loadUsers();
         } catch (error) {
             console.error('Error deleting user:', error);
+            throw error;
+        }
+    };
+
+    const toggleUserActive = async (id, currentActiveStatus) => {
+        try {
+            const newStatus = !currentActiveStatus;
+            const { error } = await supabase
+                .from('users')
+                .update({ active: newStatus })
+                .eq('id', id);
+
+            if (error) throw error;
+            await loadUsers();
+
+            return newStatus;
+        } catch (error) {
+            console.error('Error toggling user active status:', error);
             throw error;
         }
     };
@@ -708,6 +752,7 @@ export const PurchaseProvider = ({ children }) => {
             addUser,
             updateUser,
             deleteUser,
+            toggleUserActive,
             addNotifications, // Legacy
             markNotificationAsRead,
             getUnreadCount

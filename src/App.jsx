@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import { PurchaseProvider, usePurchase } from './context/PurchaseContext';
+import AllowedDomains from './pages/AllowedDomains';
 
 function AppWrapper() {
   return (
@@ -126,6 +127,11 @@ function App() {
           initialData={getEditingRequest()}
           onCancel={() => navigateTo('requests')}
           onSubmit={() => navigateTo('requests')}
+          onNavigate={navigateTo}
+        />
+      )}
+      {view === 'allowed-domains' && (
+        <AllowedDomains
           onNavigate={navigateTo}
         />
       )}

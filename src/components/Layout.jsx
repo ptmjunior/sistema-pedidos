@@ -77,7 +77,7 @@ const Layout = ({ children, onNavigate, currentPath }) => {
                     </button>
 
                     {/* Role-based Navigation */}
-                    {currentUser.role === 'approver' && (
+                    {(currentUser.role === 'approver' || currentUser.role === 'admin') && (
                         <>
                             <button
                                 className={`nav-item ${currentPath === 'approvals' ? 'active' : ''}`}
@@ -89,6 +89,12 @@ const Layout = ({ children, onNavigate, currentPath }) => {
                                 </div>
                                 {stats.pending > 0 && <span className="badge-count">{stats.pending}</span>}
                             </button>
+                        </>
+                    )}
+
+                    {/* Admin-only features */}
+                    {currentUser.role === 'admin' && (
+                        <>
                             <button
                                 className={`nav-item ${currentPath === 'users' ? 'active' : ''}`}
                                 onClick={() => onNavigate('users')}
@@ -98,10 +104,22 @@ const Layout = ({ children, onNavigate, currentPath }) => {
                                     <span>{t.nav.users}</span>
                                 </div>
                             </button>
+                            <button
+                                className={`nav-item ${currentPath === 'allowed-domains' ? 'active' : ''}`}
+                                onClick={() => onNavigate('allowed-domains')}
+                            >
+                                <div className="flex items-center gap-sm">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                    <span>Domínios Permitidos</span>
+                                </div>
+                            </button>
                         </>
                     )}
 
-                    {(currentUser.role === 'approver' || currentUser.role === 'buyer') && (
+                    {(currentUser.role === 'approver' || currentUser.role === 'buyer' || currentUser.role === 'admin') && (
                         <>
                             <button
                                 className={`nav-item ${currentPath === 'vendors' ? 'active' : ''}`}

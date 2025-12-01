@@ -4,7 +4,7 @@ import { usePurchase } from '../context/PurchaseContext';
 import { translations as t } from '../utils/translations';
 
 const Users = ({ onNavigate }) => {
-    const { users, addUser, updateUser, deleteUser, currentUser } = usePurchase();
+    const { users, addUser, updateUser, deleteUser, toggleUserActive, currentUser } = usePurchase();
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -17,8 +17,8 @@ const Users = ({ onNavigate }) => {
         department: ''
     });
 
-    // Only Approvers (Admins) can manage users
-    if (currentUser.role !== 'approver') {
+    // Only Admins can manage users
+    if (currentUser.role !== 'admin') {
         // Auto-redirect to dashboard after 3 seconds
         React.useEffect(() => {
             const timer = setTimeout(() => {
@@ -93,9 +93,38 @@ const Users = ({ onNavigate }) => {
         setShowForm(true);
     };
 
-    const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
-            deleteUser(id);
+    const handleToggleActive = async (user) => {
+        const action = user.active !== false ? 'desativar' : 'ativar';
+        const message = user.active !== false
+            ? `Desativar o usuário "${user.name}"?\n\nEle não poderá mais fazer login no sistema, mas todos os seus pedidos serão mantidos.`
+            : `Ativar o usuário "${user.name}"?\n\nEle poderá fazer login no sistema novamente.`;
+
+        if (window.confirm(message)) {
+            try {
+                const newStatus = await toggleUserActive(user.id, user.active);
+                setMessage({
+                    type: 'success',
+                    text: `Usuário ${newStatus ? 'ativado' : 'desativado'} com sucesso!`
+                });
+                setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+            } catch (error) {
+                console.error('Error toggling user status:', error);
+                setMessage({
+                    type: 'error',
+                    text: 'Erro ao alterar status do usuário. Tente novamente.'
+                });
+            }
+        }
+    };
+
+    const handleDelete = (id, userName) => {
+        const confirmMessage = `⚠️ ATENÇÃO: Exclusão Permanente ⚠️\n\nDeseja EXCLUIR PERMANENTEMENTE o usuário "${userName}"?\n\nEsta ação:\n• Remove completamente o usuário do sistema\n• NÃO pode ser desfeita\n• Os pedidos do usuário serão MANTIDOS\n\nRecomendação: Use "Desativar" ao invés de excluir.\n\nTem certeza que deseja continuar?`;
+
+        if (window.confirm(confirmMessage)) {
+            // Second confirmation
+            if (window.confirm('Esta é sua última chance. Confirma a EXCLUSÃO PERMANENTE?')) {
+                deleteUser(id);
+            }
         }
     };
 
@@ -120,6 +149,12 @@ const Users = ({ onNavigate }) => {
                     {showForm ? t.users.cancel : t.users.addUser}
                 </button>
             </div>
+
+            {message.text && (
+                <div className={`message-box ${message.type} mb-md`}>
+                    {message.text}
+                </div>
+            )}
 
             {showForm && (
                 <div className="card mb-lg animate-fade-in">
@@ -174,6 +209,7 @@ const Users = ({ onNavigate }) => {
                                     <option value="requester">{t.users.requester}</option>
                                     <option value="approver">{t.users.approver}</option>
                                     <option value="buyer">{t.users.buyer}</option>
+                                    <option value="admin">Administrador</option>
                                 </select>
                             </div>
                             <div className="form-group">
@@ -205,6 +241,7 @@ const Users = ({ onNavigate }) => {
                 </div>
             )}
 
+            {/* Domains List */}
             <div className="card p-0">
                 <table className="w-full">
                     <thead>
@@ -213,12 +250,13 @@ const Users = ({ onNavigate }) => {
                             <th className="p-md text-sm text-muted font-medium">{t.users.email}</th>
                             <th className="p-md text-sm text-muted font-medium">{t.users.role}</th>
                             <th className="p-md text-sm text-muted font-medium">{t.users.department}</th>
+                            <th className="p-md text-sm text-muted font-medium">Status</th>
                             <th className="p-md text-sm text-muted font-medium text-right">{t.users.actions}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {users.map((user) => (
-                            <tr key={user.id} className="border-b last:border-0">
+                            <tr key={user.id} className={`border-b last:border-0 ${user.active === false ? 'opacity-60' : ''}`}>
                                 <td className="p-md font-bold">{user.name}</td>
                                 <td className="p-md text-muted">{user.email}</td>
                                 <td className="p-md">
@@ -227,6 +265,11 @@ const Users = ({ onNavigate }) => {
                                     </span>
                                 </td>
                                 <td className="p-md text-muted">{user.department || '-'}</td>
+                                <td className="p-md">
+                                    <span className={`badge badge-status status-${user.active !== false ? 'active' : 'inactive'}`}>
+                                        {user.active !== false ? 'Ativo' : 'Inativo'}
+                                    </span>
+                                </td>
                                 <td className="p-md text-right">
                                     <button
                                         onClick={() => handleEdit(user)}
@@ -235,12 +278,20 @@ const Users = ({ onNavigate }) => {
                                         {t.users.edit}
                                     </button>
                                     {user.id !== currentUser.id && (
-                                        <button
-                                            onClick={() => handleDelete(user.id)}
-                                            className="text-red-600 hover:underline"
-                                        >
-                                            {t.users.delete}
-                                        </button>
+                                        <>
+                                            <button
+                                                onClick={() => handleToggleActive(user)}
+                                                className={`${user.active !== false ? 'text-warning' : 'text-success'} hover:underline mr-sm`}
+                                            >
+                                                {user.active !== false ? 'Desativar' : 'Ativar'}
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(user.id, user.name)}
+                                                className="text-red-600 hover:underline"
+                                            >
+                                                Excluir
+                                            </button>
+                                        </>
                                     )}
                                 </td>
                             </tr>
@@ -263,7 +314,20 @@ const Users = ({ onNavigate }) => {
         .role-requester { background-color: #e0f2fe; color: #0369a1; }
         .role-approver { background-color: #f3e8ff; color: #7e22ce; }
         .role-buyer { background-color: #ffedd5; color: #c2410c; }
+        .role-admin { background-color: #fee2e2; color: #991b1b; font-weight: 700; }
+        
+        .badge-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-active { background-color: #dcfce7; color: #15803d; }
+        .status-inactive { background-color: #fee2e2; color: #b91c1c; }
+        
         .text-red-600 { color: #dc2626; }
+        .text-warning { color: #f59e0b; }
+        .text-success { color: #15803d; }
         .mr-sm { margin-right: var(--spacing-sm); }
         .message-box {
             padding: var(--spacing-sm) var(--spacing-md);
@@ -280,6 +344,9 @@ const Users = ({ onNavigate }) => {
             background-color: #fee;
             color: #c33;
             border: 1px solid #fcc;
+        }
+        .opacity-60 {
+            opacity: 0.6;
         }
       `}</style>
         </Layout>

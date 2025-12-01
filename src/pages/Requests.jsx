@@ -42,8 +42,8 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
             r.status === 'open' ||
             r.userId === currentUser.id
         );
-    } else if (currentUser.role === 'approver') {
-        // Approver sees ALL requests including pending ones
+    } else if (currentUser.role === 'approver' || currentUser.role === 'admin') {
+        // Approver/Admin sees ALL requests including pending ones
         visibleRequests = requests;
     }
     // If no specific role, show all (fallback)
@@ -166,8 +166,8 @@ const Requests = ({ onNavigate, initialViewingRequestId }) => {
                                             </button>
                                         )}
 
-                                        {/* Edit only allowed for requester if status is pending, or for approver */}
-                                        {(currentUser.id === req.userId && req.status === 'pending') || currentUser.role === 'approver' ? (
+                                        {/* Edit only allowed for requester if status is pending, or for approver/admin */}
+                                        {(currentUser.id === req.userId && req.status === 'pending') || currentUser.role === 'approver' || currentUser.role === 'admin' ? (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onNavigate('edit-order', { id: req.id }); }}
                                                 className="btn-text text-primary"
