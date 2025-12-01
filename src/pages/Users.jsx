@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import InvitationModal from '../components/InvitationModal';
+import { supabase } from '../lib/supabase';
 import { usePurchase } from '../context/PurchaseContext';
 import { translations as t } from '../utils/translations';
 
 const Users = ({ onNavigate }) => {
     const { users, addUser, updateUser, deleteUser, toggleUserActive, currentUser } = usePurchase();
     const [showForm, setShowForm] = useState(false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [activeTab, setActiveTab] = useState('users'); // 'users' or 'invitations'
+    const [invitations, setInvitations] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
@@ -26,6 +31,59 @@ const Users = ({ onNavigate }) => {
             }, 3000);
             return () => clearTimeout(timer);
         }, [onNavigate]);
+
+        useEffect(() => {
+            if (activeTab === 'invitations') {
+                loadInvitations();
+            }
+        }, [activeTab]);
+
+        const loadInvitations = async () => {
+            setIsLoading(true);
+            try {
+                // Expire old invitations first
+                await supabase.rpc('expire_old_invitations');
+
+                const { data, error } = await supabase
+                    .from('invitations')
+                    .select('*, users!invitations_created_by_fkey(name)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                setInvitations(data || []);
+            } catch (err) {
+                console.error('Error loading invitations:', err);
+                setMessage({ type: 'error', text: 'Erro ao carregar convites.' });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        const handleCancelInvitation = async (id) => {
+            if (!confirm('Tem certeza que deseja cancelar este convite?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('invitations')
+                    .update({ status: 'cancelled' })
+                    .eq('id', id);
+
+                if (error) throw error;
+                loadInvitations();
+                setMessage({ type: 'success', text: 'Convite cancelado com sucesso.' });
+                setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+            } catch (err) {
+                console.error('Error cancelling invitation:', err);
+                setMessage({ type: 'error', text: 'Erro ao cancelar convite.' });
+            }
+        };
+
+        const copyInviteLink = (token) => {
+            const link = `${window.location.origin}/invite/${token}`;
+            navigator.clipboard.writeText(link);
+            setMessage({ type: 'success', text: 'Link copiado!' });
+            setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+        };
 
         return (
             <Layout onNavigate={onNavigate} currentPath="users">
@@ -142,12 +200,38 @@ const Users = ({ onNavigate }) => {
         <Layout onNavigate={onNavigate} currentPath="users">
             <div className="flex justify-between items-center mb-md">
                 <h1 className="text-2xl font-bold">{t.users.title}</h1>
-                <button
-                    onClick={() => setShowForm(!showForm)}
-                    className="btn btn-primary"
-                >
-                    {showForm ? t.users.cancel : t.users.addUser}
-                </button>
+                <div className="flex gap-sm">
+                    <div className="flex bg-slate-100 rounded-lg p-1 mr-md">
+                        <button
+                            className={`px-4 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-white shadow-sm text-primary' : 'text-muted hover:text-gray-700'}`}
+                            onClick={() => setActiveTab('users')}
+                        >
+                            Usuários
+                        </button>
+                        <button
+                            className={`px-4 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'invitations' ? 'bg-white shadow-sm text-primary' : 'text-muted hover:text-gray-700'}`}
+                            onClick={() => setActiveTab('invitations')}
+                        >
+                            Convites
+                        </button>
+                    </div>
+
+                    {activeTab === 'users' ? (
+                        <button
+                            onClick={() => setShowForm(!showForm)}
+                            className="btn btn-primary"
+                        >
+                            {showForm ? t.users.cancel : t.users.addUser}
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setShowInviteModal(true)}
+                            className="btn btn-primary"
+                        >
+                            + Gerar Convite
+                        </button>
+                    )}
+                </div>
             </div>
 
             {message.text && (
@@ -156,149 +240,237 @@ const Users = ({ onNavigate }) => {
                 </div>
             )}
 
-            {showForm && (
-                <div className="card mb-lg animate-fade-in">
-                    <h2 className="text-lg font-bold mb-md">{editingId ? t.users.edit : t.users.addNew}</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid-2 gap-md mb-md">
-                            <div className="form-group">
-                                <label className="label">{t.users.name}</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    className="input"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="label">{t.users.email}</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    className="input"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="label">
-                                    Senha{editingId && ' (opcional - deixe em branco para manter a atual)'}
-                                </label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    className="input"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required={!editingId}
-                                    minLength={6}
-                                    placeholder={editingId ? 'Nova senha (opcional)' : 'Mínimo 6 caracteres'}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="label">{t.users.role}</label>
-                                <select
-                                    name="role"
-                                    className="input select"
-                                    value={formData.role}
-                                    onChange={handleChange}
-                                >
-                                    <option value="requester">{t.users.requester}</option>
-                                    <option value="approver">{t.users.approver}</option>
-                                    <option value="buyer">{t.users.buyer}</option>
-                                    <option value="admin">Administrador</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="label">{t.users.department}</label>
-                                <input
-                                    type="text"
-                                    name="department"
-                                    className="input"
-                                    value={formData.department}
-                                    onChange={handleChange}
-                                    placeholder="Optional"
-                                />
-                            </div>
-                        </div>
-
-                        {message.text && (
-                            <div className={`message-box ${message.type}`}>
-                                {message.text}
-                            </div>
-                        )}
-
-                        <div className="flex justify-end gap-sm">
-                            <button type="button" onClick={resetForm} className="btn btn-secondary" disabled={isLoading}>{t.users.cancel}</button>
-                            <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                                {isLoading ? 'Salvando...' : t.users.save}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            {showInviteModal && (
+                <InvitationModal
+                    onClose={() => setShowInviteModal(false)}
+                    onSuccess={() => {
+                        loadInvitations();
+                        // Don't close modal immediately so user can copy link
+                        // Modal handles its own success state
+                    }}
+                />
             )}
 
-            {/* Domains List */}
-            <div className="card p-0">
-                <table className="w-full">
-                    <thead>
-                        <tr className="text-left border-b bg-slate-50">
-                            <th className="p-md text-sm text-muted font-medium">{t.users.name}</th>
-                            <th className="p-md text-sm text-muted font-medium">{t.users.email}</th>
-                            <th className="p-md text-sm text-muted font-medium">{t.users.role}</th>
-                            <th className="p-md text-sm text-muted font-medium">{t.users.department}</th>
-                            <th className="p-md text-sm text-muted font-medium">Status</th>
-                            <th className="p-md text-sm text-muted font-medium text-right">{t.users.actions}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map((user) => (
-                            <tr key={user.id} className={`border-b last:border-0 ${user.active === false ? 'opacity-60' : ''}`}>
-                                <td className="p-md font-bold">{user.name}</td>
-                                <td className="p-md text-muted">{user.email}</td>
-                                <td className="p-md">
-                                    <span className={`badge badge-role role-${user.role}`}>
-                                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                                    </span>
-                                </td>
-                                <td className="p-md text-muted">{user.department || '-'}</td>
-                                <td className="p-md">
-                                    <span className={`badge badge-status status-${user.active !== false ? 'active' : 'inactive'}`}>
-                                        {user.active !== false ? 'Ativo' : 'Inativo'}
-                                    </span>
-                                </td>
-                                <td className="p-md text-right">
-                                    <button
-                                        onClick={() => handleEdit(user)}
-                                        className="text-primary hover:underline mr-sm"
-                                    >
-                                        {t.users.edit}
+            {activeTab === 'users' ? (
+                <>
+                    {showForm && (
+                        <div className="card mb-lg animate-fade-in">
+                            <h2 className="text-lg font-bold mb-md">{editingId ? t.users.edit : t.users.addNew}</h2>
+                            <form onSubmit={handleSubmit}>
+                                <div className="grid-2 gap-md mb-md">
+                                    <div className="form-group">
+                                        <label className="label">{t.users.name}</label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            className="input"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="label">{t.users.email}</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            className="input"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="label">
+                                            Senha{editingId && ' (opcional - deixe em branco para manter a atual)'}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            className="input"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            required={!editingId}
+                                            minLength={6}
+                                            placeholder={editingId ? 'Nova senha (opcional)' : 'Mínimo 6 caracteres'}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="label">{t.users.role}</label>
+                                        <select
+                                            name="role"
+                                            className="input select"
+                                            value={formData.role}
+                                            onChange={handleChange}
+                                        >
+                                            <option value="requester">{t.users.requester}</option>
+                                            <option value="approver">{t.users.approver}</option>
+                                            <option value="buyer">{t.users.buyer}</option>
+                                            <option value="admin">Administrador</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="label">{t.users.department}</label>
+                                        <input
+                                            type="text"
+                                            name="department"
+                                            className="input"
+                                            value={formData.department}
+                                            onChange={handleChange}
+                                            placeholder="Optional"
+                                        />
+                                    </div>
+                                </div>
+
+                                {message.text && (
+                                    <div className={`message-box ${message.type}`}>
+                                        {message.text}
+                                    </div>
+                                )}
+
+                                <div className="flex justify-end gap-sm">
+                                    <button type="button" onClick={resetForm} className="btn btn-secondary" disabled={isLoading}>{t.users.cancel}</button>
+                                    <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                                        {isLoading ? 'Salvando...' : t.users.save}
                                     </button>
-                                    {user.id !== currentUser.id && (
-                                        <>
-                                            <button
-                                                onClick={() => handleToggleActive(user)}
-                                                className={`${user.active !== false ? 'text-warning' : 'text-success'} hover:underline mr-sm`}
-                                            >
-                                                {user.active !== false ? 'Desativar' : 'Ativar'}
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(user.id, user.name)}
-                                                className="text-red-600 hover:underline"
-                                            >
-                                                Excluir
-                                            </button>
-                                        </>
-                                    )}
-                                </td>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+                </>
+            ) : null}
+
+            {/* Domains List */}
+            {activeTab === 'users' ? (
+                <div className="card p-0">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="text-left border-b bg-slate-50">
+                                <th className="p-md text-sm text-muted font-medium">{t.users.name}</th>
+                                <th className="p-md text-sm text-muted font-medium">{t.users.email}</th>
+                                <th className="p-md text-sm text-muted font-medium">{t.users.role}</th>
+                                <th className="p-md text-sm text-muted font-medium">{t.users.department}</th>
+                                <th className="p-md text-sm text-muted font-medium">Status</th>
+                                <th className="p-md text-sm text-muted font-medium text-right">{t.users.actions}</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {users.map((user) => (
+                                <tr key={user.id} className={`border-b last:border-0 ${user.active === false ? 'opacity-60' : ''}`}>
+                                    <td className="p-md font-bold">{user.name}</td>
+                                    <td className="p-md text-muted">{user.email}</td>
+                                    <td className="p-md">
+                                        <span className={`badge badge-role role-${user.role}`}>
+                                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                        </span>
+                                    </td>
+                                    <td className="p-md text-muted">{user.department || '-'}</td>
+                                    <td className="p-md">
+                                        <span className={`badge badge-status status-${user.active !== false ? 'active' : 'inactive'}`}>
+                                            {user.active !== false ? 'Ativo' : 'Inativo'}
+                                        </span>
+                                    </td>
+                                    <td className="p-md text-right">
+                                        <button
+                                            onClick={() => handleEdit(user)}
+                                            className="text-primary hover:underline mr-sm"
+                                        >
+                                            {t.users.edit}
+                                        </button>
+                                        {user.id !== currentUser.id && (
+                                            <>
+                                                <button
+                                                    onClick={() => handleToggleActive(user)}
+                                                    className={`${user.active !== false ? 'text-warning' : 'text-success'} hover:underline mr-sm`}
+                                                >
+                                                    {user.active !== false ? 'Desativar' : 'Ativar'}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(user.id, user.name)}
+                                                    className="text-red-600 hover:underline"
+                                                >
+                                                    Excluir
+                                                </button>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="card p-0">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="text-left border-b bg-slate-50">
+                                <th className="p-md text-sm text-muted font-medium">Email</th>
+                                <th className="p-md text-sm text-muted font-medium">Função</th>
+                                <th className="p-md text-sm text-muted font-medium">Criado por</th>
+                                <th className="p-md text-sm text-muted font-medium">Status</th>
+                                <th className="p-md text-sm text-muted font-medium">Expira em</th>
+                                <th className="p-md text-sm text-muted font-medium text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {invitations.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="p-xl text-center text-muted">
+                                        Nenhum convite encontrado
+                                    </td>
+                                </tr>
+                            ) : (
+                                invitations.map((invite) => (
+                                    <tr key={invite.id} className="border-b last:border-0">
+                                        <td className="p-md font-medium">{invite.email}</td>
+                                        <td className="p-md">
+                                            <span className={`badge badge-role role-${invite.role}`}>
+                                                {invite.role.charAt(0).toUpperCase() + invite.role.slice(1)}
+                                            </span>
+                                        </td>
+                                        <td className="p-md text-muted text-sm">
+                                            {invite.users?.name || 'Admin'}
+                                            <div className="text-xs">
+                                                {new Date(invite.created_at).toLocaleDateString()}
+                                            </div>
+                                        </td>
+                                        <td className="p-md">
+                                            <span className={`badge badge-status status-${invite.status}`}>
+                                                {invite.status === 'pending' ? 'Pendente' :
+                                                    invite.status === 'accepted' ? 'Aceito' :
+                                                        invite.status === 'expired' ? 'Expirado' : 'Cancelado'}
+                                            </span>
+                                        </td>
+                                        <td className="p-md text-muted text-sm">
+                                            {invite.expires_at ? new Date(invite.expires_at).toLocaleDateString() : 'Nunca'}
+                                        </td>
+                                        <td className="p-md text-right">
+                                            {invite.status === 'pending' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => copyInviteLink(invite.token)}
+                                                        className="text-primary hover:underline mr-sm"
+                                                        title="Copiar Link"
+                                                    >
+                                                        Copiar
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleCancelInvitation(invite.id)}
+                                                        className="text-red-600 hover:underline"
+                                                        title="Cancelar Convite"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                </>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             <style>{`
         .grid-2 {
@@ -324,6 +496,11 @@ const Users = ({ onNavigate }) => {
         }
         .status-active { background-color: #dcfce7; color: #15803d; }
         .status-inactive { background-color: #fee2e2; color: #b91c1c; }
+        
+        .status-pending { background-color: #fef3c7; color: #d97706; }
+        .status-accepted { background-color: #dcfce7; color: #15803d; }
+        .status-expired { background-color: #f1f5f9; color: #64748b; }
+        .status-cancelled { background-color: #fee2e2; color: #b91c1c; }
         
         .text-red-600 { color: #dc2626; }
         .text-warning { color: #f59e0b; }

@@ -13,6 +13,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import { PurchaseProvider, usePurchase } from './context/PurchaseContext';
 import AllowedDomains from './pages/AllowedDomains';
+import Register from './pages/Register';
 
 function AppWrapper() {
   return (
@@ -54,6 +55,12 @@ function App() {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     const isRecoveryMode = localStorage.getItem('password_recovery_active') === 'true';
+
+    // Check if this is an invitation flow
+    const path = window.location.pathname;
+    if (path.startsWith('/invite/')) {
+      return <Register />;
+    }
 
     if (type === 'recovery' || isRecoveryMode) {
       return <ResetPassword onNavigate={navigateTo} />;
