@@ -90,7 +90,9 @@ const Register = () => {
                 { auth: { persistSession: false } }
             );
 
-            // Create auth user
+            let userId = null;
+
+            // Try to create auth user
             const { data: authData, error: authError } = await tempSupabase.auth.signUp({
                 email: invitation.email,
                 password: formData.password,
@@ -103,20 +105,44 @@ const Register = () => {
                 }
             });
 
-            if (authError) throw authError;
+            // Check if user already exists in Auth (from previous deletion)
+            if (authError && authError.message.includes('already registered')) {
+                // User exists in Auth but not in users table
+                // Try to sign in to get user ID
+                const { data: signInData, error: signInError } = await tempSupabase.auth.signInWithPassword({
+                    email: invitation.email,
+                    password: formData.password
+                });
 
-            if (authData.user) {
-                // Create public profile
+                if (signInError) {
+                    throw new Error('Este email já está registrado com senha diferente. Entre em contato com o administrador.');
+                }
+
+                if (signInData.user) {
+                    userId = signInData.user.id;
+                    // Sign out from temp session
+                    await tempSupabase.auth.signOut();
+                }
+            } else if (authError) {
+                throw authError;
+            } else if (authData.user) {
+                userId = authData.user.id;
+            }
+
+            if (userId) {
+                // Create or update public profile
                 const { error: profileError } = await supabase
                     .from('users')
-                    .insert([{
-                        id: authData.user.id,
+                    .upsert([{
+                        id: userId,
                         email: invitation.email,
                         name: formData.name,
                         role: invitation.role,
                         department: invitation.department || null,
                         active: true
-                    }]);
+                    }], {
+                        onConflict: 'id'
+                    });
 
                 if (profileError) throw profileError;
 

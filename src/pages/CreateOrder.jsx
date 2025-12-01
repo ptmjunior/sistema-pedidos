@@ -11,7 +11,6 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
     const [formData, setFormData] = useState({
         desc: '',
         priority: 'medium',
-        priority: 'medium',
         notes: '',
         editComment: ''
     });
@@ -33,7 +32,6 @@ const CreateOrder = ({ onCancel, onSubmit, onNavigate, initialData }) => {
         if (initialData) {
             setFormData({
                 desc: initialData.desc || '',
-                priority: initialData.priority || 'medium',
                 priority: initialData.priority || 'medium',
                 notes: initialData.notes || ''
             });
