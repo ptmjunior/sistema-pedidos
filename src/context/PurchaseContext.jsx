@@ -338,24 +338,24 @@ export const PurchaseProvider = ({ children }) => {
 
                 // Send email notification to approvers
                 try {
-                    const emailData = emailTemplates.submission({
-                        id: request.id,
-                        createdAt: request.created_at,
-                        desc: newRequest.desc,
-                        amount: totalAmount,
-                        department: currentUser.department,
-                        items: newRequest.items
-                    }, currentUser.name);
-
-                    const { error: fnError } = await supabase.functions.invoke('send-notification-email', {
-                        body: {
-                            to: approvers.map(a => a.email).concat([currentUser.email]).join(','),
-                            subject: emailData.subject,
-                            message: emailData.html
-                        }
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'submission',
+                            request: {
+                                id: request.id,
+                                createdAt: request.created_at,
+                                desc: newRequest.desc,
+                                amount: totalAmount,
+                                department: currentUser.department,
+                                items: newRequest.items
+                            },
+                            requesterName: currentUser.name,
+                            recipients: approvers.map(a => a.email),
+                            cc: [currentUser.email]
+                        })
                     });
-
-                    if (fnError) throw fnError;
                     console.log('Email notification sent to approvers');
                 } catch (emailError) {
                     console.error('Error sending email:', emailError);
