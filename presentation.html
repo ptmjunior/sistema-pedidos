@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pedidos de Compra - Casa das Tintas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: hsl(173, 91%, 28%);
+            --primary-light: hsl(173, 91%, 35%);
+            --primary-dark: hsl(173, 91%, 20%);
+            --secondary: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveGrid 20s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            z-index: 1;
+            padding: 2rem;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #fff, #e0f2f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.2s backwards;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            animation: fadeInUp 1s ease-out 0.4s backwards;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .scroll-indicator::before {
+            content: '↓';
+            font-size: 2rem;
+            color: white;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        /* Section Styles */
+        section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 1rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            margin-bottom: 4rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .feature-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .feature-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .feature-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .feature-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .feature-card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .feature-card:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Workflow */
+        .workflow {
+            background: linear-gradient(135deg, #f8fafc 0%, #e0f2f1 100%);
+            padding: 5rem 2rem;
+            margin: 3rem 0;
+        }
+
+        .workflow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1000px;
+            margin: 3rem auto;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            position: relative;
+            opacity: 0;
+            animation: fadeInScale 0.6s ease-out forwards;
+        }
+
+        .step:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .step:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .step:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .step:nth-child(4) {
+            animation-delay: 0.8s;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0 auto 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .step h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .step p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .step::after {
+            content: '→';
+            position: absolute;
+            right: -2.5rem;
+            top: 35px;
+            font-size: 2rem;
+            color: var(--primary);
+            opacity: 0.4;
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            background: var(--surface);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            max-width: 800px;
+            margin: 3rem auto;
+        }
+
+        .tech-item {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            background: var(--bg);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .tech-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .tech-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .tech-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .tech-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .tech-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .tech-item:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        .tech-item:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .tech-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Benefits */
+        .benefits {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .benefits h2 {
+            color: white;
+            -webkit-text-fill-color: white;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .benefit {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .benefit:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .workflow-steps {
+                flex-direction: column;
+            }
+
+            .step::after {
+                content: '↓';
+                right: auto;
+                top: auto;
+                bottom: -2rem;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .hero-stats {
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>🎨 Sistema de Pedidos de Compra</h1>
+            <p>Plataforma completa para gestão de solicitações e aprovações de compras da Casa das Tintas</p>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">4</span>
+                    <span class="stat-label">Perfis de Usuário</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Automatizado</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">24/7</span>
+                    <span class="stat-label">Disponível</span>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator"
+            onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})"></div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+        <h2>Funcionalidades Principais</h2>
+        <p class="section-subtitle">Sistema completo com gestão de usuários, aprovações multi-nível e notificações em
+            tempo real</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">👥</span>
+                <h3>Gestão de Usuários</h3>
+                <p>Controle completo de perfis com 4 níveis de acesso: Solicitante, Aprovador, Comprador e
+                    Administrador.</p>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">📋</span>
+                <h3>Pedidos Inteligentes</h3>
+                <p>Criação e gestão de pedidos com itens detalhados, anexos e rastreamento de status em tempo real.</p>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">✅</span>
+                <h3>Aprovação de Pedidos</h3>
+                <p>Workflow de aprovação robusto com suporte a comentários e histórico completo de ações.</p>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">📧</span>
+                <h3>Notificações Automáticas</h3>
+                <p>Sistema de emails automáticos para todas as etapas do processo, mantendo todos informados.</p>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">📊</span>
+                <h3>Relatórios e Analytics</h3>
+                <p>Dashboards interativos com filtros avançados e visualização de dados em tempo real.</p>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🔐</span>
+                <h3>Segurança Avançada</h3>
+                <p>Autenticação robusta, RLS no banco de dados e controle granular de permissões.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow Section -->
+    <div class="workflow">
+        <h2>Fluxo de Trabalho</h2>
+        <p class="section-subtitle">Processo simplificado e transparente do início ao fim</p>
+
+        <div class="workflow-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Solicitação</h3>
+                <p>Usuário cria e submete o pedido de compra</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Aprovação</h3>
+                <p>Aprovador revisa e aprova/rejeita</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Compra</h3>
+                <p>Comprador processa e finaliza</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Entrega</h3>
+                <p>Rastreamento e notificação</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <section class="tech-stack">
+        <h2>Tecnologias Utilizadas</h2>
+        <p class="section-subtitle">Stack moderno e escalável para máxima performance e confiabilidade</p>
+
+        <div class="tech-grid">
+            <div class="tech-item">
+                <div class="tech-icon">⚛️</div>
+                <div class="tech-name">React</div>
+            </div>
+
+            <div class="tech-item">
+                <div class="tech-icon">🗄️</div>
+                <div class="tech-name">Supabase</div>
+            </div>
+
+            <div class="tech-item">
+                <div class="tech-icon">⚡</div>
+                <div class="tech-name">Vite</div>
+            </div>
+
+            <div class="tech-item">
+                <div class="tech-icon">🎨</div>
+                <div class="tech-name">Modern CSS</div>
+            </div>
+
+            <div class="tech-item">
+                <div class="tech-icon">🔄</div>
+                <div class="tech-name">Edge Functions</div>
+            </div>
+
+            <div class="tech-item">
+                <div class="tech-icon">📱</div>
+                <div class="tech-name">Responsive</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits -->
+    <section class="benefits">
+        <h2>Benefícios do Sistema</h2>
+
+        <div class="benefits-grid">
+            <div class="benefit">
+                <div class="benefit-icon">⏱️</div>
+                <h3>Economia de Tempo</h3>
+                <p>Redução de até 70% no tempo de processamento de pedidos</p>
+            </div>
+
+            <div class="benefit">
+                <div class="benefit-icon">📈</div>
+                <h3>Maior Controle</h3>
+                <p>Visibilidade total sobre todas as solicitações e status</p>
+            </div>
+
+            <div class="benefit">
+                <div class="benefit-icon">🎯</div>
+                <h3>Precisão</h3>
+                <p>Redução de erros com validações automáticas</p>
+            </div>
+
+            <div class="benefit">
+                <div class="benefit-icon">💰</div>
+                <h3>Economia</h3>
+                <p>Melhor controle de gastos e aprovações</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <h3>🎨 Casa das Tintas</h3>
+        <p>Sistema de Pedidos de Compra</p>
+        <p style="margin-top: 2rem; font-size: 0.9rem;">Desenvolvido com React + Supabase</p>
+        <p style="font-size: 0.8rem; opacity: 0.6;">© 2024 Casa das Tintas AL. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // Smooth scroll for all anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+
+</html>

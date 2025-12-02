@@ -22,6 +22,60 @@ const Users = ({ onNavigate }) => {
         department: ''
     });
 
+    // Load invitations when tab changes
+    useEffect(() => {
+        if (activeTab === 'invitations') {
+            loadInvitations();
+        }
+    }, [activeTab]);
+
+    const loadInvitations = async () => {
+        setIsLoading(true);
+        try {
+            // Expire old invitations first
+            await supabase.rpc('expire_old_invitations');
+
+            const { data, error } = await supabase
+                .from('invitations')
+                .select('*, users!invitations_created_by_fkey(name)')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setInvitations(data || []);
+        } catch (err) {
+            console.error('Error loading invitations:', err);
+            setMessage({ type: 'error', text: 'Erro ao carregar convites.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCancelInvitation = async (id) => {
+        if (!confirm('Tem certeza que deseja cancelar este convite?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('invitations')
+                .update({ status: 'cancelled' })
+                .eq('id', id);
+
+            if (error) throw error;
+            loadInvitations();
+            setMessage({ type: 'success', text: 'Convite cancelado com sucesso.' });
+            setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+        } catch (err) {
+            console.error('Error cancelling invitation:', err);
+            setMessage({ type: 'error', text: 'Erro ao cancelar convite.' });
+        }
+    };
+
+    const copyInviteLink = (token) => {
+        const link = `${window.location.origin}/invite/${token}`;
+        navigator.clipboard.writeText(link);
+        setMessage({ type: 'success', text: 'Link copiado!' });
+        setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    };
+
     // Only Admins can manage users
     if (currentUser.role !== 'admin') {
         // Auto-redirect to dashboard after 3 seconds
@@ -31,59 +85,6 @@ const Users = ({ onNavigate }) => {
             }, 3000);
             return () => clearTimeout(timer);
         }, [onNavigate]);
-
-        useEffect(() => {
-            if (activeTab === 'invitations') {
-                loadInvitations();
-            }
-        }, [activeTab]);
-
-        const loadInvitations = async () => {
-            setIsLoading(true);
-            try {
-                // Expire old invitations first
-                await supabase.rpc('expire_old_invitations');
-
-                const { data, error } = await supabase
-                    .from('invitations')
-                    .select('*, users!invitations_created_by_fkey(name)')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                setInvitations(data || []);
-            } catch (err) {
-                console.error('Error loading invitations:', err);
-                setMessage({ type: 'error', text: 'Erro ao carregar convites.' });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        const handleCancelInvitation = async (id) => {
-            if (!confirm('Tem certeza que deseja cancelar este convite?')) return;
-
-            try {
-                const { error } = await supabase
-                    .from('invitations')
-                    .update({ status: 'cancelled' })
-                    .eq('id', id);
-
-                if (error) throw error;
-                loadInvitations();
-                setMessage({ type: 'success', text: 'Convite cancelado com sucesso.' });
-                setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-            } catch (err) {
-                console.error('Error cancelling invitation:', err);
-                setMessage({ type: 'error', text: 'Erro ao cancelar convite.' });
-            }
-        };
-
-        const copyInviteLink = (token) => {
-            const link = `${window.location.origin}/invite/${token}`;
-            navigator.clipboard.writeText(link);
-            setMessage({ type: 'success', text: 'Link copiado!' });
-            setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-        };
 
         return (
             <Layout onNavigate={onNavigate} currentPath="users">
@@ -405,6 +406,7 @@ const Users = ({ onNavigate }) => {
                         <thead>
                             <tr className="text-left border-b bg-slate-50">
                                 <th className="p-md text-sm text-muted font-medium">Email</th>
+                                <th className="p-md text-sm text-muted font-medium">Link</th>
                                 <th className="p-md text-sm text-muted font-medium">Função</th>
                                 <th className="p-md text-sm text-muted font-medium">Criado por</th>
                                 <th className="p-md text-sm text-muted font-medium">Status</th>
@@ -415,7 +417,7 @@ const Users = ({ onNavigate }) => {
                         <tbody>
                             {invitations.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="p-xl text-center text-muted">
+                                    <td colSpan="7" className="p-xl text-center text-muted">
                                         Nenhum convite encontrado
                                     </td>
                                 </tr>
@@ -423,6 +425,11 @@ const Users = ({ onNavigate }) => {
                                 invitations.map((invite) => (
                                     <tr key={invite.id} className="border-b last:border-0">
                                         <td className="p-md font-medium">{invite.email}</td>
+                                        <td className="p-md text-muted text-sm">
+                                            <span className="truncate" title={`${window.location.origin}/invite/${invite.token}`}>
+                                                {`${window.location.origin}/invite/${invite.token}`}
+                                            </span>
+                                        </td>
                                         <td className="p-md">
                                             <span className={`badge badge-role role-${invite.role}`}>
                                                 {invite.role.charAt(0).toUpperCase() + invite.role.slice(1)}
@@ -521,6 +528,13 @@ const Users = ({ onNavigate }) => {
             background-color: #fee;
             color: #c33;
             border: 1px solid #fcc;
+        }
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 250px;
+            display: block;
         }
         .opacity-60 {
             opacity: 0.6;

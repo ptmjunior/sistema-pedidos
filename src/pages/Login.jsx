@@ -98,7 +98,7 @@ const Login = ({ onNavigate }) => {
                 </div>
 
                 <div className="copyright-footer">
-                    <p>© 2024 Casa das Tintas. Todos os direitos reservados.</p>
+                    <p>© 2025 Casa das Tintas. Todos os direitos reservados.</p>
                     <p className="developer-credits">
                         Desenvolvido por <strong>Pedro Tenório Mascarenhas Júnior</strong>
                     </p>

@@ -74,6 +74,7 @@ const InvitationModal = ({ onClose, onSuccess }) => {
             const { data: { user } } = await supabase.auth.getUser();
 
             // Create invitation
+
             const { data: invitation, error: inviteError } = await supabase
                 .from('invitations')
                 .insert([{

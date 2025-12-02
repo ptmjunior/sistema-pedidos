@@ -62,12 +62,6 @@ export const emailTemplates = {
                             </table>
                         </div>
                         
-                        <div style="text-align: center; margin-top: 32px;">
-                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                                Ver Detalhes e Aprovar
-                            </a>
-                        </div>
-                        
                         <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
                             <p style="margin: 4px 0;">Sistema de Pedidos de Compra - Casa das Tintas</p>
                             <p style="margin: 4px 0;">Esta é uma mensagem automática, por favor não responda.</p>
@@ -141,12 +135,6 @@ export const emailTemplates = {
                         </div>
                         ` : ''}
                         
-                        <div style="text-align: center; margin-top: 32px;">
-                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" style="display: inline-block; background-color: #16a34a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                                Acessar Sistema
-                            </a>
-                        </div>
-                        
                         <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
                             <p style="margin: 4px 0;">Sistema de Pedidos de Compra - Casa das Tintas</p>
                             <p style="margin: 4px 0;">Esta é uma mensagem automática, por favor não responda.</p>
@@ -195,12 +183,6 @@ export const emailTemplates = {
                         </div>
                         
                         <p style="color: #4b5563;">Você pode revisar o pedido e submetê-lo novamente se necessário.</p>
-                        
-                        <div style="text-align: center; margin-top: 32px;">
-                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                                Acessar Sistema
-                            </a>
-                        </div>
                         
                         <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
                             <p style="margin: 4px 0;">Sistema de Pedidos de Compra - Casa das Tintas</p>
@@ -273,12 +255,6 @@ export const emailTemplates = {
                                     ${itemsHtml}
                                 </tbody>
                             </table>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 32px;">
-                            <a href="${process.env.VERCEL_URL || 'https://sistema-pedidos-six.vercel.app'}" style="display: inline-block; background-color: #1e40af; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                                Acessar Sistema
-                            </a>
                         </div>
                         
                         <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
