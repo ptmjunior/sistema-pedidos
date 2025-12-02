@@ -82,6 +82,8 @@ const Register = () => {
                 throw new Error('A senha deve ter pelo menos 6 caracteres.');
             }
 
+            let userId = null;
+
             // Try to create auth user
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: invitation.email,
