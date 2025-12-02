@@ -21,8 +21,8 @@ serve(async (req) => {
       port: 587,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: Deno.env.get('GMAIL_USER'), // naoresponda@casadastintas-al.com
-        pass: Deno.env.get('GMAIL_APP_PASSWORD') // 16-character app password
+        user: Deno.env.get('GMAIL_USER'),
+        pass: Deno.env.get('GMAIL_APP_PASSWORD')
       }
     })
 

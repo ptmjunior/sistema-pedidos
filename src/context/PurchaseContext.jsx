@@ -350,8 +350,7 @@ export const PurchaseProvider = ({ children }) => {
                         currentUser.name
                     );
 
-                    console.log('Attempting to send submission email to:', approvers.map(a => a.email));
-                    const { data: emailData, error: emailError } = await supabase.functions.invoke('send-notification-email', {
+                    await supabase.functions.invoke('send-notification-email', {
                         body: {
                             to: approvers.map(a => a.email).join(','),
                             cc: currentUser.email,
@@ -359,8 +358,6 @@ export const PurchaseProvider = ({ children }) => {
                             html
                         }
                     });
-                    if (emailError) console.error('Supabase Function Error:', emailError);
-                    else console.log('Supabase Function Response:', emailData);
                     console.log('Email notification sent to approvers');
                 } catch (emailError) {
                     console.error('Error sending email:', emailError);
@@ -536,16 +533,13 @@ export const PurchaseProvider = ({ children }) => {
                                     currentUser.name
                                 );
 
-                                console.log('Attempting to send approval email to:', recipients);
-                                const { data: emailData, error: emailError } = await supabase.functions.invoke('send-notification-email', {
+                                await supabase.functions.invoke('send-notification-email', {
                                     body: {
                                         to: recipients.join(','),
                                         subject,
                                         html
                                     }
                                 });
-                                if (emailError) console.error('Supabase Function Error:', emailError);
-                                else console.log('Supabase Function Response:', emailData);
                             }
                         } catch (err) {
                             console.error('Error sending approval email:', err);
@@ -566,16 +560,13 @@ export const PurchaseProvider = ({ children }) => {
                                     currentUser.name
                                 );
 
-                                console.log('Attempting to send rejection email to:', requester.email);
-                                const { data: emailData, error: emailError } = await supabase.functions.invoke('send-notification-email', {
+                                await supabase.functions.invoke('send-notification-email', {
                                     body: {
                                         to: requester.email,
                                         subject,
                                         html
                                     }
                                 });
-                                if (emailError) console.error('Supabase Function Error:', emailError);
-                                else console.log('Supabase Function Response:', emailData);
                             }
                         } catch (err) {
                             console.error('Error sending rejection email:', err);
@@ -611,16 +602,13 @@ export const PurchaseProvider = ({ children }) => {
                                 requester.name
                             );
 
-                            console.log('Attempting to send purchased email to:', requester.email);
-                            const { data: emailData, error: emailError } = await supabase.functions.invoke('send-notification-email', {
+                            await supabase.functions.invoke('send-notification-email', {
                                 body: {
                                     to: requester.email,
                                     subject,
                                     html
                                 }
                             });
-                            if (emailError) console.error('Supabase Function Error:', emailError);
-                            else console.log('Supabase Function Response:', emailData);
                         }
                     } catch (err) {
                         console.error('Error sending purchased email:', err);
