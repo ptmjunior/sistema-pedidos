@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { createSubmissionNotifications, createApprovalNotifications, createRejectionNotifications } from '../utils/notificationService';
+import { emailTemplates } from '../utils/emailTemplates';
 
 const PurchaseContext = createContext();
 
@@ -337,24 +338,24 @@ export const PurchaseProvider = ({ children }) => {
 
                 // Send email notification to approvers
                 try {
-                    await fetch('/api/send-email', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            type: 'submission',
-                            request: {
-                                id: request.id,
-                                createdAt: request.created_at,
-                                desc: newRequest.desc,
-                                amount: totalAmount,
-                                department: currentUser.department,
-                                items: newRequest.items
-                            },
-                            requesterName: currentUser.name,
-                            recipients: approvers.map(a => a.email),
-                            cc: [currentUser.email]
-                        })
+                    const emailData = emailTemplates.submission({
+                        id: request.id,
+                        createdAt: request.created_at,
+                        desc: newRequest.desc,
+                        amount: totalAmount,
+                        department: currentUser.department,
+                        items: newRequest.items
+                    }, currentUser.name);
+
+                    const { error: fnError } = await supabase.functions.invoke('send-notification-email', {
+                        body: {
+                            to: approvers.map(a => a.email).concat([currentUser.email]).join(','),
+                            subject: emailData.subject,
+                            message: emailData.html
+                        }
                     });
+
+                    if (fnError) throw fnError;
                     console.log('Email notification sent to approvers');
                 } catch (emailError) {
                     console.error('Error sending email:', emailError);
@@ -510,10 +511,74 @@ export const PurchaseProvider = ({ children }) => {
 
             // Create notifications based on status
             if (request) {
+                const requester = users.find(u => u.id === request.userId);
+
                 if (status === 'approved') {
-                    await createApprovalNotifications(request, currentUser, users, supabase);
+                    const buyers = users.filter(u => u.role === 'buyer');
+                    const approvalNotifications = createApprovalNotifications(request, requester, buyers, currentUser.name);
+
+                    if (approvalNotifications.length > 0) {
+                        await supabase.from('notifications').insert(approvalNotifications);
+
+                        // Send email to requester and buyers via API
+                        try {
+                            const recipients = [requester?.email, ...buyers.map(b => b.email)].filter(Boolean);
+
+                            if (recipients.length > 0) {
+                                await fetch('/api/send-email', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        type: 'approval',
+                                        request: {
+                                            id: request.id,
+                                            createdAt: request.created_at,
+                                            desc: request.desc,
+                                            amount: request.amount,
+                                            department: request.department,
+                                            items: request.items
+                                        },
+                                        requesterName: requester?.name || 'Solicitante',
+                                        approverName: currentUser.name,
+                                        recipients: recipients
+                                    })
+                                });
+                            }
+                        } catch (err) {
+                            console.error('Error sending approval email:', err);
+                        }
+                    }
                 } else if (status === 'rejected') {
-                    await createRejectionNotifications(request, currentUser, users, supabase);
+                    const rejectionNotifications = createRejectionNotifications(request, requester, currentUser.name);
+
+                    if (rejectionNotifications.length > 0) {
+                        await supabase.from('notifications').insert(rejectionNotifications);
+
+                        // Send email to requester via API
+                        try {
+                            if (requester?.email) {
+                                await fetch('/api/send-email', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        type: 'rejection',
+                                        request: {
+                                            id: request.id,
+                                            createdAt: request.created_at,
+                                            desc: request.desc,
+                                            amount: request.amount,
+                                            department: request.department
+                                        },
+                                        requesterName: requester.name,
+                                        approverName: currentUser.name,
+                                        recipients: [requester.email]
+                                    })
+                                });
+                            }
+                        } catch (err) {
+                            console.error('Error sending rejection email:', err);
+                        }
+                    }
                 } else if (status === 'pending') {
                     // Notification when more info is requested
                     await supabase
@@ -535,6 +600,29 @@ export const PurchaseProvider = ({ children }) => {
                             message: `<p>Seu pedido <strong>${request.desc}</strong> foi comprado.</p>`,
                             request_id: request.id
                         }]);
+
+                    // Send email to requester via API
+                    try {
+                        if (requester?.email) {
+                            await fetch('/api/send-email', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    type: 'purchased',
+                                    request: {
+                                        id: request.id,
+                                        createdAt: request.created_at,
+                                        desc: request.desc,
+                                        items: request.items
+                                    },
+                                    requesterName: requester.name,
+                                    recipients: [requester.email]
+                                })
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Error sending purchased email:', err);
+                    }
                 }
             }
 
