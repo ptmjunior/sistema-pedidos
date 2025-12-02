@@ -60,6 +60,7 @@ const Users = ({ onNavigate }) => {
                 .eq('id', id);
 
             if (error) throw error;
+
             loadInvitations();
             setMessage({ type: 'success', text: 'Convite cancelado com sucesso.' });
             setTimeout(() => setMessage({ type: '', text: '' }), 3000);
