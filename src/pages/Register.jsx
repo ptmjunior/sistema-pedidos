@@ -142,7 +142,7 @@ const Register = () => {
                     .update({
                         status: 'accepted',
                         used_at: new Date().toISOString(),
-                        used_by: authData.user.id
+                        used_by: userId
                     })
                     .eq('token', token);
 
