@@ -13,14 +13,11 @@ let notificationIdCounter = 1;
  */
 export const createSubmissionNotifications = (request, approvers) => {
     return approvers.map(approver => ({
-        id: notificationIdCounter++,
         type: 'submission',
-        recipientId: approver.id,
-        recipientEmail: approver.email,
-        subject: 'New Purchase Order Awaiting Approval',
-        message: `A new purchase order (PO-2024-00${request.id}) has been submitted by ${request.user} for $${request.amount.toFixed(2)}. Description: ${request.desc}`,
-        requestId: request.id,
-        timestamp: new Date().toISOString(),
+        recipient_id: approver.id,
+        subject: 'Novo Pedido Aguardando Aprovação',
+        message: `<p>Um novo pedido (PO-2024-00${request.id}) foi submetido por <strong>${request.user}</strong> no valor de R$ ${request.amount.toFixed(2)}.</p><p>Descrição: ${request.desc}</p>`,
+        request_id: request.id,
         read: false
     }));
 };
@@ -39,14 +36,11 @@ export const createApprovalNotifications = (request, requester, buyers, approver
     // Notification for requester
     if (requester) {
         notifications.push({
-            id: notificationIdCounter++,
             type: 'approval',
-            recipientId: requester.id,
-            recipientEmail: requester.email,
-            subject: 'Purchase Order Approved',
-            message: `Your purchase order (PO-2024-00${request.id}) for $${request.amount.toFixed(2)} has been approved by ${approverName}. The procurement team will process your order.`,
-            requestId: request.id,
-            timestamp: new Date().toISOString(),
+            recipient_id: requester.id,
+            subject: 'Pedido Aprovado',
+            message: `<p>Seu pedido (PO-2024-00${request.id}) no valor de R$ ${request.amount.toFixed(2)} foi aprovado por <strong>${approverName}</strong>.</p><p>A equipe de compras processará seu pedido.</p>`,
+            request_id: request.id,
             read: false
         });
     }
@@ -54,14 +48,11 @@ export const createApprovalNotifications = (request, requester, buyers, approver
     // Notifications for buyers
     buyers.forEach(buyer => {
         notifications.push({
-            id: notificationIdCounter++,
             type: 'approval',
-            recipientId: buyer.id,
-            recipientEmail: buyer.email,
-            subject: 'New Approved Purchase Order for Processing',
-            message: `Purchase order (PO-2024-00${request.id}) for $${request.amount.toFixed(2)} has been approved by ${approverName}. Requested by ${request.user}. Description: ${request.desc}`,
-            requestId: request.id,
-            timestamp: new Date().toISOString(),
+            recipient_id: buyer.id,
+            subject: 'Novo Pedido Aprovado para Compra',
+            message: `<p>O pedido (PO-2024-00${request.id}) no valor de R$ ${request.amount.toFixed(2)} foi aprovado por <strong>${approverName}</strong>.</p><p>Solicitante: ${request.user}</p><p>Descrição: ${request.desc}</p>`,
+            request_id: request.id,
             read: false
         });
     });
@@ -80,14 +71,11 @@ export const createRejectionNotifications = (request, requester, approverName) =
     if (!requester) return [];
 
     return [{
-        id: notificationIdCounter++,
         type: 'rejection',
-        recipientId: requester.id,
-        recipientEmail: requester.email,
-        subject: 'Purchase Order Rejected',
-        message: `Your purchase order (PO-2024-00${request.id}) for $${request.amount.toFixed(2)} has been rejected by ${approverName}. Please review and resubmit if necessary.`,
-        requestId: request.id,
-        timestamp: new Date().toISOString(),
+        recipient_id: requester.id,
+        subject: 'Pedido Rejeitado',
+        message: `<p>Seu pedido (PO-2024-00${request.id}) no valor de R$ ${request.amount.toFixed(2)} foi rejeitado por <strong>${approverName}</strong>.</p><p>Por favor, revise e submeta novamente se necessário.</p>`,
+        request_id: request.id,
         read: false
     }];
 };
