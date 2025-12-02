@@ -1,9 +1,19 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import nodemailer from 'npm:nodemailer@6.9.7'
 
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
-    const { to, subject, message } = await req.json()
+    const { to, subject, message, html, cc, bcc } = await req.json()
 
     // Configure Gmail SMTP transporter
     const transporter = nodemailer.createTransport({
@@ -16,12 +26,9 @@ serve(async (req) => {
       }
     })
 
-    // Email options with Casa das Tintas branding
-    const mailOptions = {
-      from: `"Casa das Tintas - Sistema de Pedidos" <${Deno.env.get('GMAIL_USER')}>`,
-      to: to,
-      subject: subject,
-      html: `
+    let emailHtml = html
+    if (!emailHtml && message) {
+      emailHtml = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -109,6 +116,16 @@ serve(async (req) => {
       `
     }
 
+    // Email options with Casa das Tintas branding
+    const mailOptions = {
+      from: `"Casa das Tintas - Sistema de Pedidos" <${Deno.env.get('GMAIL_USER')}>`,
+      to: to,
+      cc: cc,
+      bcc: bcc,
+      subject: subject,
+      html: emailHtml
+    }
+
     // Send email
     const info = await transporter.sendMail(mailOptions)
 
@@ -121,7 +138,7 @@ serve(async (req) => {
         to: to
       }),
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200
       }
     )
@@ -134,7 +151,7 @@ serve(async (req) => {
         error: error.message
       }),
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500
       }
     )

@@ -338,23 +338,25 @@ export const PurchaseProvider = ({ children }) => {
 
                 // Send email notification to approvers
                 try {
-                    await fetch('/api/send-email', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            type: 'submission',
-                            request: {
-                                id: request.id,
-                                createdAt: request.created_at,
-                                desc: newRequest.desc,
-                                amount: totalAmount,
-                                department: currentUser.department,
-                                items: newRequest.items
-                            },
-                            requesterName: currentUser.name,
-                            recipients: approvers.map(a => a.email),
-                            cc: [currentUser.email]
-                        })
+                    const { subject, html } = emailTemplates.submission(
+                        {
+                            id: request.id,
+                            createdAt: request.created_at,
+                            desc: newRequest.desc,
+                            amount: totalAmount,
+                            department: currentUser.department,
+                            items: newRequest.items
+                        },
+                        currentUser.name
+                    );
+
+                    await supabase.functions.invoke('send-notification-email', {
+                        body: {
+                            to: approvers.map(a => a.email).join(','),
+                            cc: currentUser.email,
+                            subject,
+                            html
+                        }
                     });
                     console.log('Email notification sent to approvers');
                 } catch (emailError) {
@@ -525,23 +527,18 @@ export const PurchaseProvider = ({ children }) => {
                             const recipients = [requester?.email, ...buyers.map(b => b.email)].filter(Boolean);
 
                             if (recipients.length > 0) {
-                                await fetch('/api/send-email', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        type: 'approval',
-                                        request: {
-                                            id: request.id,
-                                            createdAt: request.created_at,
-                                            desc: request.desc,
-                                            amount: request.amount,
-                                            department: request.department,
-                                            items: request.items
-                                        },
-                                        requesterName: requester?.name || 'Solicitante',
-                                        approverName: currentUser.name,
-                                        recipients: recipients
-                                    })
+                                const { subject, html } = emailTemplates.approval(
+                                    request,
+                                    requester?.name || 'Solicitante',
+                                    currentUser.name
+                                );
+
+                                await supabase.functions.invoke('send-notification-email', {
+                                    body: {
+                                        to: recipients.join(','),
+                                        subject,
+                                        html
+                                    }
                                 });
                             }
                         } catch (err) {
@@ -557,22 +554,18 @@ export const PurchaseProvider = ({ children }) => {
                         // Send email to requester via API
                         try {
                             if (requester?.email) {
-                                await fetch('/api/send-email', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        type: 'rejection',
-                                        request: {
-                                            id: request.id,
-                                            createdAt: request.created_at,
-                                            desc: request.desc,
-                                            amount: request.amount,
-                                            department: request.department
-                                        },
-                                        requesterName: requester.name,
-                                        approverName: currentUser.name,
-                                        recipients: [requester.email]
-                                    })
+                                const { subject, html } = emailTemplates.rejection(
+                                    request,
+                                    requester.name,
+                                    currentUser.name
+                                );
+
+                                await supabase.functions.invoke('send-notification-email', {
+                                    body: {
+                                        to: requester.email,
+                                        subject,
+                                        html
+                                    }
                                 });
                             }
                         } catch (err) {
@@ -604,20 +597,17 @@ export const PurchaseProvider = ({ children }) => {
                     // Send email to requester via API
                     try {
                         if (requester?.email) {
-                            await fetch('/api/send-email', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    type: 'purchased',
-                                    request: {
-                                        id: request.id,
-                                        createdAt: request.created_at,
-                                        desc: request.desc,
-                                        items: request.items
-                                    },
-                                    requesterName: requester.name,
-                                    recipients: [requester.email]
-                                })
+                            const { subject, html } = emailTemplates.purchased(
+                                request,
+                                requester.name
+                            );
+
+                            await supabase.functions.invoke('send-notification-email', {
+                                body: {
+                                    to: requester.email,
+                                    subject,
+                                    html
+                                }
                             });
                         }
                     } catch (err) {
