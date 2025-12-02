@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { createClient } from '@supabase/supabase-js';
 
 const Register = () => {
     const [token, setToken] = useState('');
@@ -83,17 +82,8 @@ const Register = () => {
                 throw new Error('A senha deve ter pelo menos 6 caracteres.');
             }
 
-            // Create temp Supabase client for registration
-            const tempSupabase = createClient(
-                import.meta.env.VITE_SUPABASE_URL,
-                import.meta.env.VITE_SUPABASE_ANON_KEY,
-                { auth: { persistSession: false } }
-            );
-
-            let userId = null;
-
             // Try to create auth user
-            const { data: authData, error: authError } = await tempSupabase.auth.signUp({
+            const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: invitation.email,
                 password: formData.password,
                 options: {
@@ -109,7 +99,7 @@ const Register = () => {
             if (authError && authError.message.includes('already registered')) {
                 // User exists in Auth but not in users table
                 // Try to sign in to get user ID
-                const { data: signInData, error: signInError } = await tempSupabase.auth.signInWithPassword({
+                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
                     email: invitation.email,
                     password: formData.password
                 });
@@ -120,8 +110,6 @@ const Register = () => {
 
                 if (signInData.user) {
                     userId = signInData.user.id;
-                    // Sign out from temp session
-                    await tempSupabase.auth.signOut();
                 }
             } else if (authError) {
                 throw authError;
