@@ -583,6 +583,28 @@ export const PurchaseProvider = ({ children }) => {
                             message: `<p>O aprovador solicitou mais informações sobre seu pedido:</p><p><em>${comments}</em></p>`,
                             request_id: request.id
                         }]);
+
+                    // Send email to requester via API
+                    try {
+                        if (requester?.email) {
+                            const { subject, html } = emailTemplates.moreInfo(
+                                request,
+                                requester.name,
+                                currentUser.name,
+                                comments
+                            );
+
+                            await supabase.functions.invoke('send-notification-email', {
+                                body: {
+                                    to: requester.email,
+                                    subject,
+                                    html
+                                }
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Error sending more info email:', err);
+                    }
                 } else if (status === 'purchased') {
                     await supabase
                         .from('notifications')

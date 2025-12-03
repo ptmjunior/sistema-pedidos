@@ -278,6 +278,58 @@ export const emailTemplates = {
             `
         };
     }
+},
+
+    // Template: Mais Informações Solicitadas (para Solicitante)
+    moreInfo: (request, requesterName, approverName, comment) => {
+        const poId = generatePOId(request.createdAt);
+return {
+    subject: `⚠️ Ação Necessária - Pedido ${poId}`,
+    html: `
+            <!DOCTYPE html>
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background-color: #f59e0b; color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <h1 style="margin: 0; font-size: 24px;">⚠️ Mais Informações Necessárias</h1>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9;">${poId}</p>
+                    </div>
+                    <div style="background-color: #ffffff; padding: 32px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="background-color: #fffbeb; padding: 20px; margin-bottom: 24px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <h3 style="margin-top: 0; color: #b45309; margin-bottom: 8px;">Atenção Necessária</h3>
+                            <p style="margin: 0; color: #92400e;">O aprovador <strong>${approverName}</strong> solicitou mais informações sobre seu pedido.</p>
+                        </div>
+                        
+                        <div style="background-color: #f8fafc; padding: 20px; margin: 24px 0; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Solicitante:</span>
+                                <span style="font-weight: 500;">${requesterName}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span style="font-weight: 600; color: #64748b;">Descrição:</span>
+                                <span style="font-weight: 500;">${request.desc}</span>
+                            </div>
+                            <div style="margin-top: 16px;">
+                                <span style="font-weight: 600; color: #64748b; display: block; margin-bottom: 8px;">Comentário do Aprovador:</span>
+                                <div style="background-color: #ffffff; padding: 12px; border: 1px solid #e2e8f0; border-radius: 4px; color: #334155; font-style: italic;">
+                                    "${comment}"
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p style="color: #4b5563;">Por favor, acesse o sistema para editar o pedido e fornecer as informações solicitadas.</p>
+                        
+                        <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                            <p style="margin: 4px 0;">Sistema de Pedidos de Compra - Casa das Tintas</p>
+                            <p style="margin: 4px 0;">Esta é uma mensagem automática, por favor não responda.</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            `
+};
+    }
 };
 
 export default emailTemplates;
