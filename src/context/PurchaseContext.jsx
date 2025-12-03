@@ -502,12 +502,27 @@ export const PurchaseProvider = ({ children }) => {
 
             // Handle 'purchased' status with delivery dates
             if (status === 'purchased' && dates) {
+                console.log('Updating delivery dates:', dates);
+                console.log('Request items:', request.items);
+
                 const updatePromises = Object.entries(dates).map(([itemId, date]) =>
                     supabase
                         .from('request_items')
                         .update({ estimated_delivery_date: date })
                         .eq('id', itemId)
                 );
+
+                // Calculate overall delivery date (latest date among items)
+                const maxDate = Object.values(dates).sort().pop();
+                if (maxDate) {
+                    updatePromises.push(
+                        supabase
+                            .from('purchase_requests')
+                            .update({ delivery_date: maxDate })
+                            .eq('id', id)
+                    );
+                }
+
                 await Promise.all(updatePromises);
             }
 
@@ -624,7 +639,7 @@ export const PurchaseProvider = ({ children }) => {
                                 ...request,
                                 items: request.items.map(item => ({
                                     ...item,
-                                    deliveryDate: dates && dates[item.id] ? dates[item.id] : item.deliveryDate
+                                    deliveryDate: dates && dates[String(item.id)] ? dates[String(item.id)] : item.deliveryDate
                                 }))
                             };
 
