@@ -619,8 +619,17 @@ export const PurchaseProvider = ({ children }) => {
                     // Send email to requester via API
                     try {
                         if (requester?.email) {
+                            // Create a temporary request object with updated delivery dates for the email
+                            const updatedRequest = {
+                                ...request,
+                                items: request.items.map(item => ({
+                                    ...item,
+                                    deliveryDate: dates && dates[item.id] ? dates[item.id] : item.deliveryDate
+                                }))
+                            };
+
                             const { subject, html } = emailTemplates.purchased(
-                                request,
+                                updatedRequest,
                                 requester.name
                             );
 
