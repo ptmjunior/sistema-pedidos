@@ -277,15 +277,14 @@ export const emailTemplates = {
             </html>
             `
         };
-    }
-},
+    },
 
     // Template: Mais Informações Solicitadas (para Solicitante)
     moreInfo: (request, requesterName, approverName, comment) => {
         const poId = generatePOId(request.createdAt);
-return {
-    subject: `⚠️ Ação Necessária - Pedido ${poId}`,
-    html: `
+        return {
+            subject: `⚠️ Ação Necessária - Pedido ${poId}`,
+            html: `
             <!DOCTYPE html>
             <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6;">
@@ -328,7 +327,7 @@ return {
             </body>
             </html>
             `
-};
+        };
     }
 };
 
